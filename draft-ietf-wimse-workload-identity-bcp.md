@@ -8,19 +8,19 @@ number:
 date:
 consensus: true
 v: 3
-area: ART
-workgroup: WG Working Group
+area: "Applications and Real-Time"
+workgroup: "Workload Identity in Multi System Environments"
 keyword:
  - next generation
  - unicorn
  - sparkling distributed ledger
 venue:
-  group: WIMSE
-  type: Working Group
-  mail: wimse@ietf.org
-  arch: https://example.com/WG
-  github: ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp
-  latest: https://example.com/LATEST
+  group: "Workload Identity in Multi System Environments"
+  type: "Working Group"
+  mail: "wimse@ietf.org"
+  arch: "https://mailarchive.ietf.org/arch/browse/wimse/"
+  github: "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp"
+  latest: "https://ietf-wg-wimse.github.io/draft-ietf-wimse-workload-identity-bcp/draft-ietf-wimse-workload-identity-bcp.html"
 
 author:
  -
