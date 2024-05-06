@@ -2,7 +2,7 @@
 title: "Best Current Practice for Workload Identity "
 category: info
 
-docname: draft-ietf-wimse-workload-identity-bcp
+docname: draft-ietf-wimse-workload-identity-bcp-latest
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
