@@ -192,7 +192,7 @@ A most important parts of the configuration are (which can be found at the end o
 
 ~~~yaml
 serviceAccountToken:
-  path: token 
+  path: token
   expirationSeconds: 7200
   audience: "https://localhost:5001/connect/token"
 ~~~
@@ -205,7 +205,7 @@ kind: Deployment
 metadata:
   name: simpleapp
   labels:
-    app: simpleapp 
+    app: simpleapp
 spec:
   replicas: 1
   selector:
@@ -234,7 +234,7 @@ spec:
           projected:
             sources:
             - serviceAccountToken:
-                path: token 
+                path: token
                 expirationSeconds: 7200
                 audience: "https://localhost:5001/connect/token"
 ~~~
