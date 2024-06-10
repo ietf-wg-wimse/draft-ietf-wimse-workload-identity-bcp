@@ -1,7 +1,7 @@
 ---
 title: Best Current Practice for Workload Identity
 abbrev: Workload Identity
-docname:  draft-ietf-wimse-workload-identity-bcp
+docname:  draft-ietf-wimse-workload-identity-bcp-latest
 category: std
 
 ipr: trust200902
