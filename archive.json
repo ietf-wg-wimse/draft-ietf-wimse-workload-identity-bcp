@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-06-09T00:48:46.240894+00:00",
+  "timestamp": "2024-06-11T00:43:52.723788+00:00",
   "repo": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
   "labels": [
     {
@@ -50,5 +50,34 @@
     }
   ],
   "issues": [],
-  "pulls": []
+  "pulls": [
+    {
+      "number": 1,
+      "id": "PR_kwDOL34A-M5x_ZFy",
+      "title": "Initial WG version",
+      "url": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp/pull/1",
+      "state": "MERGED",
+      "author": "hannestschofenig",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2024-06-10T15:03:17Z",
+      "updatedAt": "2024-06-10T16:13:28Z",
+      "baseRepository": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
+      "baseRefName": "main",
+      "baseRefOid": "ec01a3f1c89344e6ec00089931b2e4a54926a6e4",
+      "headRepository": "hannestschofenig/draft-ietf-wimse-workload-identity-bcp",
+      "headRefName": "patch-1",
+      "headRefOid": "c4317bfe036e906a91427b7ad07bd91b64df800a",
+      "closedAt": "2024-06-10T16:13:28Z",
+      "mergedAt": "2024-06-10T16:13:28Z",
+      "mergedBy": "hannestschofenig",
+      "mergeCommit": {
+        "oid": "08c166b0dc4bf9eb7c5a961997872a86ad4bd8e6"
+      },
+      "comments": [],
+      "reviews": []
+    }
+  ]
 }
