@@ -34,6 +34,12 @@ author:
       name: Hannes Tschofenig
       email: hannes.tschofenig@siemens.com
       org: Siemens
+ 
+ -
+      ins: E. Giordano
+      name: Edoardo Giordano
+      email: edoardo.giordano@nokia.com
+      org: Nokia
 
  -
       ins: Y. Rosomakho
