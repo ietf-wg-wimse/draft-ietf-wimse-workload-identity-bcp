@@ -5,7 +5,9 @@
 WIMSE                                                         B. Hofmann
 Internet-Draft                                             H. Tschofenig
 Intended status: Standards Track                                 Siemens
-Expires: 15 December 2024                                   Y. Rosomakho
+Expires: 15 December 2024                                    E. Giordano
+                                                                   Nokia
+                                                            Y. Rosomakho
                                                                  Zscaler
                                                             13 June 2024
 
@@ -411,6 +413,11 @@ Authors' Addresses
    Hannes Tschofenig
    Siemens
    Email: hannes.tschofenig@siemens.com
+
+
+   Edoardo Giordano
+   Nokia
+   Email: edoardo.giordano@nokia.com
 
 
    Yaroslav Rosomakho
