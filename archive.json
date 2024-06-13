@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-06-11T00:43:52.723788+00:00",
+  "timestamp": "2024-06-13T00:43:38.224545+00:00",
   "repo": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
   "labels": [
     {
@@ -76,6 +76,58 @@
       "mergeCommit": {
         "oid": "08c166b0dc4bf9eb7c5a961997872a86ad4bd8e6"
       },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 2,
+      "id": "PR_kwDOL34A-M5yF69B",
+      "title": "Adding Author",
+      "url": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp/pull/2",
+      "state": "OPEN",
+      "author": "edoardogiordano",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2024-06-11T10:33:04Z",
+      "updatedAt": "2024-06-12T17:46:54Z",
+      "baseRepository": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
+      "baseRefName": "main",
+      "baseRefOid": "674e3b55f87c35d4fc43446b75ba5340e7bd617a",
+      "headRepository": "edoardogiordano/draft-ietf-wimse-workload-identity-bcp",
+      "headRefName": "patch-1",
+      "headRefOid": "5632c9e8513024b27d6b183933e93b1bc0fd13a4",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 3,
+      "id": "PR_kwDOL34A-M5yHmGw",
+      "title": "Added co-author",
+      "url": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp/pull/3",
+      "state": "OPEN",
+      "author": "yaroslavros",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2024-06-11T14:10:08Z",
+      "updatedAt": "2024-06-12T17:49:42Z",
+      "baseRepository": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
+      "baseRefName": "main",
+      "baseRefOid": "674e3b55f87c35d4fc43446b75ba5340e7bd617a",
+      "headRepository": "yaroslavros/draft-ietf-wimse-workload-identity-bcp",
+      "headRefName": "main",
+      "headRefOid": "3a2d0d520e93be5abd21b370151c24321ecc5b44",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
       "comments": [],
       "reviews": []
     }
