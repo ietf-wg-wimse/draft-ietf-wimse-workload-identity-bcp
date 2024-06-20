@@ -63,16 +63,16 @@ informative:
 
 --- abstract
 
-The use of the OAuth 2.0 framework for container orchestration systems poses a challenge as managing secrets, such as client_id and client_secret, can be complex and error-prone.
-"Service account token volume projection", a term introduced by Kubernetes, provides a way of injecting JSON Web Tokens (JWTs) to workloads. This document describes the current best practices to avoid client_secret provisioning and leverage platform attestation to receive access tokens from an OAuth 2.0 authorization server via RFC 7523.
+The use of the OAuth 2.0 framework for container orchestration systems poses a challenge as managing secrets, such as client_id and client_secret, can be complex and error-prone. "Service account token volume projection", a term introduced by Kubernetes, provides a way of injecting JSON Web Tokens (JWTs) to workloads. 
+
+This document describes the current best practices to avoid client_secret provisioning and leverage platform attestation to receive access tokens from an OAuth 2.0 authorization server via RFC 7523.
 
 --- middle
 
 # Introduction
 
 <!-- Introduce the environment -->
-In workload scenarios dedicated management entities, also called  "control plane" entities, are used to start, monitor and stop workloads dynamically.
-These workloads often communicate with one another and with other entities within the company network or online. When one workload, acting as an OAuth client, wants to gain access to a protected resource hosted on another workload or on the Internet (referred here generically as a resource server) then authorization is typically required.
+In workload scenarios dedicated management entities, also called  "control plane" entities, are used to start, monitor and stop workloads dynamically. These workloads often communicate with one another and with other entities within the company network or online. When one workload, acting as an OAuth client, wants to gain access to a protected resource hosted on another workload or on the Internet (referred here generically as a resource server) then authorization is typically required.
 
 <!-- The challenge -->
 In order to authenticate workloads accessing resources, each workload instance has to be provisioned with unique credentials. This is a challenge in environments where workloads start, stop, relocate and scale dynamically. Manual configuration, rotation and overall management comes with at best management overhead, at worst results in security risks such as credential exposure.
