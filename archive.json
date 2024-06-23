@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-06-20T00:42:55.412452+00:00",
+  "timestamp": "2024-06-23T00:47:36.004269+00:00",
   "repo": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
   "labels": [
     {
@@ -132,6 +132,125 @@
       "mergeCommit": {
         "oid": "504fbe7cf103fc2583271ec69f7c270ccc4cc63f"
       },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 4,
+      "id": "PR_kwDOL34A-M5zFh4o",
+      "title": "My take on the problem/introduction",
+      "url": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp/pull/4",
+      "state": "OPEN",
+      "author": "arndt-s",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Taking our last conversation into account I wanted to contribute my take on the problem and wrote the introduction the way I see it.  \r\n\r\nThis is not a version that can be merged, but the best way to show it in a diff and allow comments. Let me know what you think.",
+      "createdAt": "2024-06-20T15:05:06Z",
+      "updatedAt": "2024-06-21T11:21:05Z",
+      "baseRepository": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
+      "baseRefName": "main",
+      "baseRefOid": "0c3a08ceddab7490694f3746f4066c12882645a3",
+      "headRepository": "arndt-s/draft-ietf-wimse-workload-identity-bcp",
+      "headRefName": "main",
+      "headRefOid": "4f88d6a561f8b067110f159e695aaaa099238415",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL34A-M5_FCYw",
+          "commit": {
+            "abbreviatedOid": "007da58"
+          },
+          "author": "b3n3d17",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-21T07:53:56Z",
+          "updatedAt": "2024-06-21T07:53:56Z",
+          "comments": [
+            {
+              "originalPosition": 52,
+              "body": "You mention here that the authorization server validates signatures based on OIDC metadata discovery or RFCXXXX. Did you have something in mind here, which RFC to reference in addition?",
+              "createdAt": "2024-06-21T07:53:56Z",
+              "updatedAt": "2024-06-21T07:53:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL34A-M5_FE0e",
+          "commit": {
+            "abbreviatedOid": "007da58"
+          },
+          "author": "b3n3d17",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-21T07:59:20Z",
+          "updatedAt": "2024-06-21T07:59:21Z",
+          "comments": [
+            {
+              "originalPosition": 29,
+              "body": "```suggestion\r\n\"Service account token volume projection\" is a feature of the container orchestration system Kubernetes that allows users to attach platform attestated tokens to their workloads. Workloads can use this token to authenticate themselves towards APIs of the platform control plane. Even though this token is used for access it can be more considered an ID Token rather than an Access Token in the OAuth context. Workloads don't get issued a refresh token nor does authorization or consent play a role. It is merely a proof that the workloads is who it claims to be. Workloads have various options available to retrieve such token from the Kubernetes platform, for example via a `TokenRequest` API invoked by business logic or `Token volume projection` which mounts the token into the file system of the workloads and keeps it up to date there. `Token volume projection` having the advantage of not requiring any manual effort by the application besides reading a file.\r\n```",
+              "createdAt": "2024-06-21T07:59:20Z",
+              "updatedAt": "2024-06-21T08:03:02Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL34A-M5_GlLU",
+          "commit": {
+            "abbreviatedOid": "4f88d6a"
+          },
+          "author": "arndt-s",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-21T11:16:42Z",
+          "updatedAt": "2024-06-21T11:21:05Z",
+          "comments": [
+            {
+              "originalPosition": 52,
+              "body": "Sorry, I forgot to look up the RFC. It's RFC8414 which defines authorization server instance metadata under .well-known. It is very similar to OIDC but not compatible. It has differences, particulary how .well-known URI is constructed.",
+              "createdAt": "2024-06-21T11:16:43Z",
+              "updatedAt": "2024-06-21T11:21:05Z"
+            },
+            {
+              "originalPosition": 29,
+              "body": "Very good point! ",
+              "createdAt": "2024-06-21T11:20:51Z",
+              "updatedAt": "2024-06-21T11:21:05Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "id": "PR_kwDOL34A-M5zFm83",
+      "title": "Adding co-author",
+      "url": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp/pull/5",
+      "state": "OPEN",
+      "author": "arndt-s",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2024-06-20T15:15:27Z",
+      "updatedAt": "2024-06-20T15:15:28Z",
+      "baseRepository": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
+      "baseRefName": "main",
+      "baseRefOid": "0c3a08ceddab7490694f3746f4066c12882645a3",
+      "headRepository": "arndt-s/draft-ietf-wimse-workload-identity-bcp",
+      "headRefName": "arndts/add_author_data",
+      "headRefOid": "c9171d27522c2c1009685519f1b85a733b838f71",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
       "comments": [],
       "reviews": []
     }
