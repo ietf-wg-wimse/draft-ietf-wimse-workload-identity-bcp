@@ -5,11 +5,13 @@
 WIMSE                                                         B. Hofmann
 Internet-Draft                                             H. Tschofenig
 Intended status: Standards Track                                 Siemens
-Expires: 15 December 2024                                    E. Giordano
+Expires: 28 December 2024                                    E. Giordano
                                                                    Nokia
                                                             Y. Rosomakho
                                                                  Zscaler
-                                                            13 June 2024
+                                                      A. Schwenkschuster
+                                                               Microsoft
+                                                            26 June 2024
 
 
               Best Current Practice for Workload Identity
@@ -43,7 +45,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 15 December 2024.
+   This Internet-Draft will expire on 28 December 2024.
 
 Copyright Notice
 
@@ -423,3 +425,8 @@ Authors' Addresses
    Yaroslav Rosomakho
    Zscaler
    Email: yrosomakho@zscaler.com
+
+
+   Arndt Schwenkschuster
+   Microsoft
+   Email: arndts.ietf@gmail.com
