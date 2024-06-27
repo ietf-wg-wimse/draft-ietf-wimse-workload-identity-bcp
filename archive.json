@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-06-25T00:43:50.046043+00:00",
+  "timestamp": "2024-06-27T00:44:14.652580+00:00",
   "repo": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
   "labels": [
     {
@@ -49,7 +49,24 @@
       "color": "ffffff"
     }
   ],
-  "issues": [],
+  "issues": [
+    {
+      "number": 6,
+      "id": "I_kwDOL34A-M6NnoKf",
+      "title": "Better title for the draft",
+      "url": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp/issues/6",
+      "state": "OPEN",
+      "author": "hannestschofenig",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "At our recent conference call we talked about better aligning the content of the draft with the title of the document. The body of the document talks about the use of JWTs with OAuth 2.0 in a container environment utilizing token change. The title is, however, so generic that we could also describe other practices. Among the authors we had not planned to extend the scope (of course, to be confirmed by the group). \r\n \r\nI asked ChatGPT for a few suggestions regarding the title and here are the options:\r\n\r\n- \"Best Current Practice for Secure Workload Identity Management\"\r\n- \"Best Current Practice in OAuth-Based Workload Identity\"\r\n- \"Best Current Practice for JWT-Based Workload Identity\"\r\n- \"Best Current Practice for Workload Identity in Container Orchestration\"\r\n- \"Best Current Practice for Workload Identity Using OAuth 2.0 and JWT\"\r\n- \r\n\r\nI like the last one best. What do others think?\r\n",
+      "createdAt": "2024-06-26T18:08:52Z",
+      "updatedAt": "2024-06-26T18:08:53Z",
+      "closedAt": null,
+      "comments": []
+    }
+  ],
   "pulls": [
     {
       "number": 1,
@@ -142,7 +159,7 @@
       "url": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp/pull/4",
       "state": "OPEN",
       "author": "arndt-s",
-      "authorAssociation": "NONE",
+      "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Taking our last conversation into account I wanted to contribute my take on the problem and wrote the introduction the way I see it.  \r\n\r\nThis is not a version that can be merged, but the best way to show it in a diff and allow comments. Let me know what you think.",
@@ -206,7 +223,7 @@
             "abbreviatedOid": "4f88d6a"
           },
           "author": "arndt-s",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2024-06-21T11:16:42Z",
@@ -233,24 +250,26 @@
       "id": "PR_kwDOL34A-M5zFm83",
       "title": "Adding co-author",
       "url": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp/pull/5",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "arndt-s",
-      "authorAssociation": "NONE",
+      "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "",
       "createdAt": "2024-06-20T15:15:27Z",
-      "updatedAt": "2024-06-20T15:15:28Z",
+      "updatedAt": "2024-06-26T18:10:50Z",
       "baseRepository": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
       "baseRefName": "main",
       "baseRefOid": "0c3a08ceddab7490694f3746f4066c12882645a3",
       "headRepository": "arndt-s/draft-ietf-wimse-workload-identity-bcp",
       "headRefName": "arndts/add_author_data",
       "headRefOid": "c9171d27522c2c1009685519f1b85a733b838f71",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2024-06-26T18:10:50Z",
+      "mergedAt": "2024-06-26T18:10:50Z",
+      "mergedBy": "hannestschofenig",
+      "mergeCommit": {
+        "oid": "6511149641c871a9732c9f90debda78d23cbe489"
+      },
       "comments": [],
       "reviews": []
     }
