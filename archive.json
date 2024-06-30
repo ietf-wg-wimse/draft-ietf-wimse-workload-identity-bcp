@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-06-27T00:44:14.652580+00:00",
+  "timestamp": "2024-06-30T00:49:29.626858+00:00",
   "repo": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
   "labels": [
     {
@@ -62,9 +62,17 @@
       "labels": [],
       "body": "At our recent conference call we talked about better aligning the content of the draft with the title of the document. The body of the document talks about the use of JWTs with OAuth 2.0 in a container environment utilizing token change. The title is, however, so generic that we could also describe other practices. Among the authors we had not planned to extend the scope (of course, to be confirmed by the group). \r\n \r\nI asked ChatGPT for a few suggestions regarding the title and here are the options:\r\n\r\n- \"Best Current Practice for Secure Workload Identity Management\"\r\n- \"Best Current Practice in OAuth-Based Workload Identity\"\r\n- \"Best Current Practice for JWT-Based Workload Identity\"\r\n- \"Best Current Practice for Workload Identity in Container Orchestration\"\r\n- \"Best Current Practice for Workload Identity Using OAuth 2.0 and JWT\"\r\n- \r\n\r\nI like the last one best. What do others think?\r\n",
       "createdAt": "2024-06-26T18:08:52Z",
-      "updatedAt": "2024-06-26T18:08:53Z",
+      "updatedAt": "2024-06-27T13:38:35Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "b3n3d17",
+          "authorAssociation": "NONE",
+          "body": "I believe the last 2 fit best:\r\n\"Best Current Practice for Workload Identity in Container Orchestration\"\r\n\"Best Current Practice for Workload Identity Using OAuth 2.0 and JWT\"\r\n\r\nor:\r\n\r\n\"Best Current Practice for OAuth 2.0 Client Authentication in [k8s|Container Orchestration] utilising JWT\"\r\n",
+          "createdAt": "2024-06-27T13:38:33Z",
+          "updatedAt": "2024-06-27T13:38:33Z"
+        }
+      ]
     }
   ],
   "pulls": [
