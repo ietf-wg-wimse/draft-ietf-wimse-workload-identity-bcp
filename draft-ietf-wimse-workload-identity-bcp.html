@@ -11,9 +11,8 @@
 <meta content="Yaroslav Rosomakho" name="author">
 <meta content="Arndt Schwenkschuster" name="author">
 <meta content='
-       The use of the OAuth 2.0 framework for workload orchestration systems poses a challenge as managing secrets, such as client_id and client_secret, can be complex and error-prone.
-"Service account token volume projection", a term introduced by Kubernetes, provides a way of injecting JSON Web Tokens (JWTs) to workloads. 
-       This document specifies the use of JWTs for client credentials in workload orchestration systems to improve interoperability in orchestration systems, to reduce complexity for developers, and motivates authorization server to support RFC 7523. 
+       The use of the OAuth 2.0 framework for container orchestration systems poses a challenge as managing secrets, such as client_id and client_secret, can be complex and error-prone. "Service account token volume projection", a term introduced by Kubernetes, provides a way of injecting JSON Web Tokens (JWTs) to workloads. 
+       This document describes the current best practices to avoid client_secret provisioning and leverage platform attestation to receive access tokens from an OAuth 2.0 authorization server via RFC 7523. 
     ' name="description">
 <meta content="xml2rfc 3.22.0" name="generator">
 <meta content="Internet-Draft" name="keyword">
@@ -1081,9 +1080,8 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <h1 id="title">Best Current Practice for OAuth 2.0 Client Authentication in Workload Environments</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
-<p id="section-abstract-1">The use of the OAuth 2.0 framework for workload orchestration systems poses a challenge as managing secrets, such as client_id and client_secret, can be complex and error-prone.
-"Service account token volume projection", a term introduced by Kubernetes, provides a way of injecting JSON Web Tokens (JWTs) to workloads.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
-<p id="section-abstract-2">This document specifies the use of JWTs for client credentials in workload orchestration systems to improve interoperability in orchestration systems, to reduce complexity for developers, and motivates authorization server to support RFC 7523.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
+<p id="section-abstract-1">The use of the OAuth 2.0 framework for container orchestration systems poses a challenge as managing secrets, such as client_id and client_secret, can be complex and error-prone. "Service account token volume projection", a term introduced by Kubernetes, provides a way of injecting JSON Web Tokens (JWTs) to workloads.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-2">This document describes the current best practices to avoid client_secret provisioning and leverage platform attestation to receive access tokens from an OAuth 2.0 authorization server via RFC 7523.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
 </section>
 <div id="status-of-memo">
 <section id="section-boilerplate.1">
@@ -1177,31 +1175,14 @@ svg :is([fill="white"], [fill^="#fff"]) {
       <h2 id="name-introduction">
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
-<p id="section-1-1">In workload scenarios dedicated management entities, also called "control plane" entities, are used to start, monitor and stop workloads dynamically.
-These workloads typically run micro services that interact with each other and with other entities on the corporate network or on the Internet.
-When one workload, acting as an OAuth client, wants to gain access to a protected resource hosted on another workload or on the Internet (referred here generically as a resource server) then authorization is typically required.<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2">OAuth has been designed to offer help in scenarios where access to protected resources needs to be managed dynamically in a distributed system.<a href="#section-1-2" class="pilcrow">¶</a></p>
-<p id="section-1-3">Each workload instance has to be provisioned with unique credentials.
-However, these credentials have to be configured prior and are then attached to the workload.
-In addition, these credentials do not have an automated rotation mechanism and are valid for an unspecified amount of time.<a href="#section-1-3" class="pilcrow">¶</a></p>
-<p id="section-1-4">This requires manual configuration effort and the missing automated rotation mechanism introduce inconvenience and increase the attack surface.<a href="#section-1-4" class="pilcrow">¶</a></p>
-<p id="section-1-5">"Service account token volume projection" is a feature of workload orchestration systems that allows users to create JSON Web Tokens (JWTs) for their workloads.
-These JWTs, referred as Service Account Tokens, can be used as client credentials, as specified in RFC 7523 <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>.
-As these tokens are managed by the "control plane" and simply mounted to the filesystem, a workload just needs to consume this file and present it to the authorization server.
-In addition, service account token volume projection allows an expiration time on these JWTs to be set, allowing automated rotation of these credentials.
-Finally, the private key for signing these tokens is managed by the "control plane", hence removing the manual effort of configuring the client_id and client_secret.<a href="#section-1-5" class="pilcrow">¶</a></p>
-<p id="section-1-6">However, there is currently no standardized way to manage these Service Account Tokens across workload orchestrators.
-This leads to inconsistencies, and additional effort for developers as they need to support different client authentication mechanisms. In the worst case, this approach is ignored in favor of client_id and client_secret.<a href="#section-1-6" class="pilcrow">¶</a></p>
-<p id="section-1-7">This specification specifies the use of Service Account Tokens in workload orchestration systems, which provides a secure and scalable way to create and manage these tokens, and ensures interoperability with existing OAuth-based authorization systems.<a href="#section-1-7" class="pilcrow">¶</a></p>
-<p id="section-1-8">When OAuth is used as part of the control plane entities, a Service Account Token is provisioned to the workload via the Agent. This interaction is shown in <a href="#fig-arch" class="auto internal xref">Figure 1</a>.<a href="#section-1-8" class="pilcrow">¶</a></p>
-<p id="section-1-9">To distinguish the entities, we use the term "Control Plane" to refer to the OAuth 2.0 Authorization Server that is part
-of the cluster's control plane. Since there are also two access tokens in play, we use the term "Service Account Token" to refer to the token issued by the Control Plane and thereby distinguish it from the other access token issued to an OAuth 2.0 client running inside the workload by the second authorization server.<a href="#section-1-9" class="pilcrow">¶</a></p>
-<p id="section-1-10">It is important to note that the workload does not use the Service Account Token with resource servers directly but instead obtains access tokens from this second authorization server.
-To obtain these access tokens, the OAuth 2.0 client running in the workload uses the JWT client authentication grant, as defined in <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>, with the Service Account Token as input. The obtained access token may be a bearer token, or a proof-of-possession token.<a href="#section-1-10" class="pilcrow">¶</a></p>
-<p id="section-1-11"><a href="#fig-arch" class="auto internal xref">Figure 1</a> illustrates the interaction in the architecture graphically.<a href="#section-1-11" class="pilcrow">¶</a></p>
+<p id="section-1-1">In workload scenarios dedicated management entities, also called  "control plane" entities, are used to start, monitor and stop workloads dynamically. These workloads often communicate with one another and with other entities within the company network or online. When one workload, acting as an OAuth client, wants to gain access to a protected resource hosted on another workload or on the Internet (referred here generically as a resource server) then authorization is typically required.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">In order to authenticate workloads accessing resources, each workload instance has to be provisioned with unique credentials. This is a challenge in environments where workloads start, stop, relocate and scale dynamically. Manual configuration, rotation and overall management comes with at best management overhead, at worst results in security risks such as credential exposure.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">"Service account token volume projection" is a feature of the container orchestration system Kubernetes that allows users to attach platform attestated tokens to their workloads. Workloads can use this token to authenticate themselves towards APIs of the platform control plane. Even though this token is used for access it can be more considered an ID Token rather than an Access Token in the OAuth context. Workloads don't get issued a refresh token nor does authorization or consent play a role. It is merely a proof that the workloads is who it claims to be. Workloads have various options available to retrieve such token from the Kubernetes platform, for example via a <code>TokenRequest</code> API invoked by business logic or <code>Token volume projection</code> which mounts the token into the file system of the workloads and keeps it up to date there. <code>Token volume projection</code> having the advantage of not requiring any manual effort by the application besides reading a file.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">Whilst the original purpose of the service account token was to authenticate access to the control plane API the industry has recognized its low maintainance and platform attestation capabilities and started using it as a JWT client assertion as specified in <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>. The token is presented to a authorization server as a client assertion. The authorization servers validates the signature of the presented assertion via <span>[<a href="#OIDC" class="cite xref">OIDC</a>]</span> metadata or <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span> and leverages the claims in the token to authenticate the client. Overall, the authorization server trusts the platform control plane with the issuance and delivery of these credentials. The authorization server responds with an Access Token the workload can use to access a OAuth2 protected resource on a resource server.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<p id="section-1-5"><a href="#fig-arch" class="auto internal xref">Figure 1</a> illustrates the interaction in the architecture graphically.<a href="#section-1-5" class="pilcrow">¶</a></p>
 <span id="name-protocol-interaction"></span><div id="fig-arch">
 <figure id="figure-1">
-        <div class="alignLeft art-text artwork" id="section-1-12.1">
+        <div class="alignLeft art-text artwork" id="section-1-6.1">
 <pre>
                       +---------------+
                       |               |
@@ -1245,8 +1226,11 @@ To obtain these access tokens, the OAuth 2.0 client running in the workload uses
 <a href="#name-protocol-interaction" class="selfRef">Protocol Interaction.</a>
         </figcaption></figure>
 </div>
-<p id="section-1-13">In <a href="#recommendations" class="auto internal xref">Section 3</a> we provide more details about how the
-content of the tokens and the offered security properties.<a href="#section-1-13" class="pilcrow">¶</a></p>
+<p id="section-1-7">This specification specifies the use of Service Account Tokens in container orchestration systems, which provides a secure and scalable way to create and manage these tokens, and ensures interoperability with existing OAuth-based authorization systems.<a href="#section-1-7" class="pilcrow">¶</a></p>
+<p id="section-1-8">To distinguish the entities, we use the term "Control Plane" to refer to the OAuth 2.0 Authorization Server that is part
+of the cluster's control plane. Since there are also two access tokens in play, we use the term "Service Account Token" to refer to the token issued by the Control Plane and thereby distinguish it from the other access token issued to an OAuth 2.0 client running inside the workload by the second authorization server.<a href="#section-1-8" class="pilcrow">¶</a></p>
+<p id="section-1-9">In <a href="#recommendations" class="auto internal xref">Section 3</a> we provide more details about how the
+content of the tokens and the offered security properties.<a href="#section-1-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="terminology">
@@ -1347,8 +1331,12 @@ terms can be used interchangably.<a href="#section-2-2" class="pilcrow">¶</a></
 <span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Campbell, B.</span>, and <span class="refAuthor">C. Mortimore</span>, <span class="refTitle">"JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants"</span>, <span class="seriesInfo">RFC 7523</span>, <span class="seriesInfo">DOI 10.17487/RFC7523</span>, <time datetime="2015-05" class="refDate">May 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7523">https://www.rfc-editor.org/rfc/rfc7523</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC8174">[RFC8174]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8414">[RFC8414]</dt>
+      <dd>
+<span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Sakimura, N.</span>, and <span class="refAuthor">J. Bradley</span>, <span class="refTitle">"OAuth 2.0 Authorization Server Metadata"</span>, <span class="seriesInfo">RFC 8414</span>, <span class="seriesInfo">DOI 10.17487/RFC8414</span>, <time datetime="2018-06" class="refDate">June 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8414">https://www.rfc-editor.org/rfc/rfc8414</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
