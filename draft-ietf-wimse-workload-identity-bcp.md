@@ -147,8 +147,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 BCP 14 {{RFC2119}} {{RFC8174}} when, and only when, they appear in all
 capitals, as shown here.
 
-The term container is sometimes used instead of workloads. These two
-terms can be used interchangably.
+The terms 'workload' and 'container' are used interchangeably.
 
 # Architecture and Recommendations {#recommendations}
 
