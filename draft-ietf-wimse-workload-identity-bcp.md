@@ -58,7 +58,7 @@ normative:
   RFC7523:
   RFC6749:
   RFC8174:
-
+  RFC8414:
 informative:
   OIDC:
      author:
@@ -69,45 +69,25 @@ informative:
 
 --- abstract
 
-The use of the OAuth 2.0 framework for workload orchestration systems poses a challenge as managing secrets, such as client_id and client_secret, can be complex and error-prone.
-"Service account token volume projection", a term introduced by Kubernetes, provides a way of injecting JSON Web Tokens (JWTs) to workloads.
+The use of the OAuth 2.0 framework for container orchestration systems poses a challenge as managing secrets, such as client_id and client_secret, can be complex and error-prone. "Service account token volume projection", a term introduced by Kubernetes, provides a way of injecting JSON Web Tokens (JWTs) to workloads.
 
-This document specifies the use of JWTs for client credentials in workload orchestration systems to improve interoperability in orchestration systems, to reduce complexity for developers, and motivates authorization server to support RFC 7523.
+This document describes the current best practices to avoid client_secret provisioning and leverage platform attestation to receive access tokens from an OAuth 2.0 authorization server via RFC 7523.
 
 --- middle
 
 # Introduction
 
-In workload scenarios dedicated management entities, also called "control plane" entities, are used to start, monitor and stop workloads dynamically.
-These workloads typically run micro services that interact with each other and with other entities on the corporate network or on the Internet.
-When one workload, acting as an OAuth client, wants to gain access to a protected resource hosted on another workload or on the Internet (referred here generically as a resource server) then authorization is typically required.
+<!-- Introduce the environment -->
+In workload scenarios dedicated management entities, also called  "control plane" entities, are used to start, monitor and stop workloads dynamically. These workloads often communicate with one another and with other entities within the company network or online. When one workload, acting as an OAuth client, wants to gain access to a protected resource hosted on another workload or on the Internet (referred here generically as a resource server) then authorization is typically required.
 
-OAuth has been designed to offer help in scenarios where access to protected resources needs to be managed dynamically in a distributed system.
+<!-- The challenge -->
+In order to authenticate workloads accessing resources, each workload instance has to be provisioned with unique credentials. This is a challenge in environments where workloads start, stop, relocate and scale dynamically. Manual configuration, rotation and overall management comes with at best management overhead, at worst results in security risks such as credential exposure.
 
-Each workload instance has to be provisioned with unique credentials.
-However, these credentials have to be configured prior and are then attached to the workload.
-In addition, these credentials do not have an automated rotation mechanism and are valid for an unspecified amount of time.
+<!-- What are service account tokens and what are their attributes -->
+"Service account token volume projection" is a feature of the container orchestration system Kubernetes that allows users to attach platform attestated tokens to their workloads. Workloads can use this token to authenticate themselves towards APIs of the platform control plane. Even though this token is used for access it can be more considered an ID Token rather than an Access Token in the OAuth context. Workloads don't get issued a refresh token nor does authorization or consent play a role. It is merely a proof that the workloads is who it claims to be. Workloads have various options available to retrieve such token from the Kubernetes platform, for example via a `TokenRequest` API invoked by business logic or `Token volume projection` which mounts the token into the file system of the workloads and keeps it up to date there. `Token volume projection` having the advantage of not requiring any manual effort by the application besides reading a file.
 
-This requires manual configuration effort and the missing automated rotation mechanism introduce inconvenience and increase the attack surface.
-
-"Service account token volume projection" is a feature of workload orchestration systems that allows users to create JSON Web Tokens (JWTs) for their workloads.
-These JWTs, referred as Service Account Tokens, can be used as client credentials, as specified in RFC 7523 {{RFC7523}}.
-As these tokens are managed by the "control plane" and simply mounted to the filesystem, a workload just needs to consume this file and present it to the authorization server.
-In addition, service account token volume projection allows an expiration time on these JWTs to be set, allowing automated rotation of these credentials.
-Finally, the private key for signing these tokens is managed by the "control plane", hence removing the manual effort of configuring the client_id and client_secret.
-
-However, there is currently no standardized way to manage these Service Account Tokens across workload orchestrators.
-This leads to inconsistencies, and additional effort for developers as they need to support different client authentication mechanisms. In the worst case, this approach is ignored in favor of client_id and client_secret.
-
-This specification specifies the use of Service Account Tokens in workload orchestration systems, which provides a secure and scalable way to create and manage these tokens, and ensures interoperability with existing OAuth-based authorization systems.
-
-When OAuth is used as part of the control plane entities, a Service Account Token is provisioned to the workload via the Agent. This interaction is shown in {{fig-arch}}.
-
-To distinguish the entities, we use the term "Control Plane" to refer to the OAuth 2.0 Authorization Server that is part
-of the cluster's control plane. Since there are also two access tokens in play, we use the term "Service Account Token" to refer to the token issued by the Control Plane and thereby distinguish it from the other access token issued to an OAuth 2.0 client running inside the workload by the second authorization server.
-
-It is important to note that the workload does not use the Service Account Token with resource servers directly but instead obtains access tokens from this second authorization server.
-To obtain these access tokens, the OAuth 2.0 client running in the workload uses the JWT client authentication grant, as defined in {{RFC7523}}, with the Service Account Token as input. The obtained access token may be a bearer token, or a proof-of-possession token.
+<!-- How Service Account Tokens can be/are used in combination with RFC 7523 to access OAuth2 protected resources -->
+Whilst the original purpose of the service account token was to authenticate access to the control plane API the industry has recognized its low maintainance and platform attestation capabilities and started using it as a JWT client assertion as specified in {{RFC7523}}. The token is presented to a authorization server as a client assertion. The authorization servers validates the signature of the presented assertion via {{OIDC}} metadata or {{RFC8414}} and leverages the claims in the token to authenticate the client. Overall, the authorization server trusts the platform control plane with the issuance and delivery of these credentials. The authorization server responds with an Access Token the workload can use to access a OAuth2 protected resource on a resource server.
 
 {{fig-arch}} illustrates the interaction in the architecture graphically.
 
@@ -151,6 +131,10 @@ To obtain these access tokens, the OAuth 2.0 client running in the workload uses
 ~~~
 {: #fig-arch title="Protocol Interaction."}
 
+This specification specifies the use of Service Account Tokens in container orchestration systems, which provides a secure and scalable way to create and manage these tokens, and ensures interoperability with existing OAuth-based authorization systems.
+
+To distinguish the entities, we use the term "Control Plane" to refer to the OAuth 2.0 Authorization Server that is part
+of the cluster's control plane. Since there are also two access tokens in play, we use the term "Service Account Token" to refer to the token issued by the Control Plane and thereby distinguish it from the other access token issued to an OAuth 2.0 client running inside the workload by the second authorization server.
 
 In {{recommendations}} we provide more details about how the
 content of the tokens and the offered security properties.
