@@ -58,7 +58,7 @@ normative:
   RFC7523:
   RFC6749:
   RFC8174:
-
+  RFC8414:
 informative:
   OIDC:
      author:
