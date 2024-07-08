@@ -78,16 +78,17 @@ This document describes the current best practices to avoid client_secret provis
 # Introduction
 
 <!-- Introduce the environment -->
-In workload scenarios dedicated management entities, also called  "control plane" entities, are used to start, monitor and stop workloads dynamically. These workloads often communicate with one another and with other entities within the company network or online. When one workload, acting as an OAuth client, wants to gain access to a protected resource hosted on another workload or on the Internet (referred here generically as a resource server) then authorization is typically required.
+In workload scenarios dedicated management entities, also referred to as "control plane" entities, are used to start, monitor and stop workloads dynamically. These workloads frequently interact with each other and other entities within the corporate network or online. When one workload, acting as an OAuth client, wants to gain access to a protected resource hosted on another workload or on the Internet (referred here generically as a resource server) then authorization is typically required.
 
 <!-- The challenge -->
-In order to authenticate workloads accessing resources, each workload instance has to be provisioned with unique credentials. This is a challenge in environments where workloads start, stop, relocate and scale dynamically. Manual configuration, rotation and overall management comes with at best management overhead, at worst results in security risks such as credential exposure.
+To authenticate workloads accessing resources, each workload instance requires unique credentials. This poses challenges in environments where workloads start, stop, relocate, and scale dynamically. Manual configuration, rotation, and management efforts can result in management overhead at best and security risks such as credential exposure at worst.
+
 
 <!-- What are service account tokens and what are their attributes -->
-"Service account token volume projection" is a feature of the container orchestration system Kubernetes that allows users to attach platform attestated tokens to their workloads. Workloads can use this token to authenticate themselves towards APIs of the platform control plane. Even though this token is used for access it can be more considered an ID Token rather than an Access Token in the OAuth context. Workloads don't get issued a refresh token nor does authorization or consent play a role. It is merely a proof that the workloads is who it claims to be. Workloads have various options available to retrieve such token from the Kubernetes platform, for example via a `TokenRequest` API invoked by business logic or `Token volume projection` which mounts the token into the file system of the workloads and keeps it up to date there. `Token volume projection` having the advantage of not requiring any manual effort by the application besides reading a file.
+"Service account token volume projection" is a feature in the Kubernetes container orchestration system that enables users to attach platform-attested tokens to their workloads. Workloads use these tokens to authenticate themselves to APIs within the platform's control plane. While this token is used for access, it functions more like an ID Token rather than an Access Token in the OAuth context. Workloads do not receive a refresh token, and there is no involvement of authorization or consent; it simply serves as proof of the workload's identity. Workloads have several methods to obtain such tokens from Kubernetes, including through the TokenRequest API invoked by business logic or Token volume projection, which mounts the token into the workload's file system and ensures it remains up-to-date. Token volume projection offers the advantage of requiring no manual intervention by the application beyond reading a file.
 
 <!-- How Service Account Tokens can be/are used in combination with RFC 7523 to access OAuth2 protected resources -->
-Whilst the original purpose of the service account token was to authenticate access to the control plane API the industry has recognized its low maintainance and platform attestation capabilities and started using it as a JWT client assertion as specified in {{RFC7523}}. The token is presented to a authorization server as a client assertion. The authorization servers validates the signature of the presented assertion via {{OIDC}} metadata or {{RFC8414}} and leverages the claims in the token to authenticate the client. Overall, the authorization server trusts the platform control plane with the issuance and delivery of these credentials. The authorization server responds with an Access Token the workload can use to access a OAuth2 protected resource on a resource server.
+Initially designed to authenticate access to the control plane API, the industry has recognized the service account token for its low maintenance and platform attestation capabilities and has started using it as a JWT client assertion, as specified in {{RFC7523}}. This token is presented to an authorization server as a client assertion. The authorization server validates the assertion's signature using {{OIDC}} metadata or {{RFC8414}} and uses the claims within the token to authenticate the client. Overall, the authorization server trusts the platform control plane for issuing and delivering these credentials. The authorization server then responds with an Access Token that the workload can use to access an OAuth2-protected resource on a resource server.
 
 {{fig-arch}} illustrates the interaction in the architecture graphically.
 
@@ -131,13 +132,11 @@ Whilst the original purpose of the service account token was to authenticate acc
 ~~~
 {: #fig-arch title="Protocol Interaction."}
 
-This specification specifies the use of Service Account Tokens in container orchestration systems, which provides a secure and scalable way to create and manage these tokens, and ensures interoperability with existing OAuth-based authorization systems.
+This specification defines the utilization of Service Account Tokens within container orchestration systems, providing a secure and scalable method for creating and managing these tokens while ensuring interoperability with existing OAuth-based authorization systems.
 
-To distinguish the entities, we use the term "Control Plane" to refer to the OAuth 2.0 Authorization Server that is part
-of the cluster's control plane. Since there are also two access tokens in play, we use the term "Service Account Token" to refer to the token issued by the Control Plane and thereby distinguish it from the other access token issued to an OAuth 2.0 client running inside the workload by the second authorization server.
+To distinguish between entities, we refer to the OAuth 2.0 Authorization Server within the cluster's control plane as the "Control Plane." Given the presence of two distinct access tokens, we specifically designate the token issued by the Control Plane as the "Service Account Token," thereby differentiating it from the access token issued to an OAuth 2.0 client operating within the workload by a separate authorization server.
 
-In {{recommendations}} we provide more details about how the
-content of the tokens and the offered security properties.
+In {{recommendations}}, further details are provided regarding the token content and the associated security properties.
 
 # Terminology
 
@@ -149,25 +148,25 @@ capitals, as shown here.
 
 The terms 'workload' and 'container' are used interchangeably.
 
-# Architecture and Recommendations {#recommendations}
+# Recommendations {#recommendations}
 
 This specification relies on the use of OAuth 2.0 {{RFC6749}} and
 {{RFC7523}} for client authentication using a JWT.
 
-Service Account Tokens used in workload orchestration systems are vulnerable to different types of threats, as shown in this list:
+Service Account Tokens used in container orchestration systems are vulnerable to various threats, as outlined below:
 
-1. Token theft: Tokens can be stolen by attackers who have already gained access to a workload. These attackers can then use these tokens to impersonate the workload and gain access to resources they should not have access to.
-2. Token reuse: Tokens can be reused by attackers to gain access to the system. However, expiration times limited the token reuse time.
-3. Misconfigured service accounts: Similar to misconfigured access to secrets, misconfigured service accounts can lead to applications gaining more privileges then necessary.
-4. Theft of token signing key: The token signing key can be stolen by attackers who have already gained access to the control plane. However, such attackers also have access to all secrets in the workload orchestration system. Hence, resulting in the same impact for use of client_id and client_secret compared to using Service Account Tokens.
+1. Token theft: Attackers who compromise a workload can steal tokens to impersonate it and gain unauthorized access to resources.
+2. Token reuse: Stolen tokens may be reused within their expiration period to gain repeated unauthorized access. However, the expiration time limits the token reuse time window.
+3. Misconfigured service accounts: mproperly configured service accounts can grant applications excessive privileges.
+4. Theft of token signing key: Attackers gaining control plane access can steal the token signing key, akin to compromising client_id and client_secret in OAuth, potentially accessing all secrets in the orchestration system.
 
 The following fields are populated in the Service Account Token:
 
 1. The 'iss' claim MUST contain a string identifying the worklod orchestrator.
-2. The 'sub' claim MUST contain a string identifying the workload. This is also the client_id according to {{RFC7523}}.
-3. The 'aud' claim MUST identify one or multiple authorization servers that are intended recipients of the Service Account Token for client authorization.
+2. The 'sub' claim MUST contain a string identifying the workload, also serving as the client_id per {{RFC7523}}.
+3. The 'aud' claim MUST identify one or multiple authorization servers intended to receive and authorize the Service Account Token.
 
-Further processing requirements are specified in {{RFC7523}}.
+Additional processing requirements are specified in {{RFC7523}}.
 
 # Security Considerations
 
@@ -180,7 +179,6 @@ This document does not require actions by IANA.
 # Acknowledgements
 
 Add your name here.
-
 
 --- back
 
