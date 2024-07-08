@@ -4,22 +4,22 @@
 <meta charset="utf-8">
 <meta content="Common,Latin" name="scripts">
 <meta content="initial-scale=1.0" name="viewport">
-<title>Best Current Practice for Workload Identity</title>
+<title>Best Current Practice for OAuth 2.0 Client Authentication in Workload Environments</title>
 <meta content="Benedikt Hofmann" name="author">
 <meta content="Hannes Tschofenig" name="author">
 <meta content="Edoardo Giordano" name="author">
 <meta content="Yaroslav Rosomakho" name="author">
 <meta content="Arndt Schwenkschuster" name="author">
 <meta content='
-       The use of the OAuth 2.0 framework for container orchestration systems poses a challenge as managing secrets, such as client_id and client_secret, can be complex and error-prone.
+       The use of the OAuth 2.0 framework for workload orchestration systems poses a challenge as managing secrets, such as client_id and client_secret, can be complex and error-prone.
 "Service account token volume projection", a term introduced by Kubernetes, provides a way of injecting JSON Web Tokens (JWTs) to workloads. 
-       This document specifies the use of JWTs for client credentials in container orchestration systems to improve interoperability in orchestration systems, to reduce complexity for  developers, and motivates authorization server to support RFC 7523. 
+       This document specifies the use of JWTs for client credentials in workload orchestration systems to improve interoperability in orchestration systems, to reduce complexity for developers, and motivates authorization server to support RFC 7523. 
     ' name="description">
-<meta content="xml2rfc 3.21.0" name="generator">
+<meta content="xml2rfc 3.22.0" name="generator">
 <meta content="Internet-Draft" name="keyword">
 <meta content="draft-ietf-wimse-workload-identity-bcp-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.21.0
+  xml2rfc 3.22.0
     Python 3.12.3
     ConfigArgParse 1.7
     google-i18n-address 3.1.0
@@ -29,9 +29,8 @@
     platformdirs 4.2.2
     pycountry 22.3.5
     PyYAML 6.0.1
-    requests 2.31.0
+    requests 2.32.3
     setuptools 69.5.1
-    six 1.16.0
     wcwidth 0.2.13
 -->
 <link href="draft-ietf-wimse-workload-identity-bcp.xml" rel="alternate" type="application/rfc+xml">
@@ -1031,11 +1030,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">Workload Identity</td>
-<td class="right">June 2024</td>
+<td class="right">July 2024</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Hofmann, et al.</td>
-<td class="center">Expires 28 December 2024</td>
+<td class="center">Expires 9 January 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1048,12 +1047,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-wimse-workload-identity-bcp-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-06-26" class="published">26 June 2024</time>
+<time datetime="2024-07-08" class="published">8 July 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2024-12-28">28 December 2024</time></dd>
+<dd class="expires"><time datetime="2025-01-09">9 January 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1079,12 +1078,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </dd>
 </dl>
 </div>
-<h1 id="title">Best Current Practice for Workload Identity</h1>
+<h1 id="title">Best Current Practice for OAuth 2.0 Client Authentication in Workload Environments</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
-<p id="section-abstract-1">The use of the OAuth 2.0 framework for container orchestration systems poses a challenge as managing secrets, such as client_id and client_secret, can be complex and error-prone.
+<p id="section-abstract-1">The use of the OAuth 2.0 framework for workload orchestration systems poses a challenge as managing secrets, such as client_id and client_secret, can be complex and error-prone.
 "Service account token volume projection", a term introduced by Kubernetes, provides a way of injecting JSON Web Tokens (JWTs) to workloads.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
-<p id="section-abstract-2">This document specifies the use of JWTs for client credentials in container orchestration systems to improve interoperability in orchestration systems, to reduce complexity for  developers, and motivates authorization server to support RFC 7523.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
+<p id="section-abstract-2">This document specifies the use of JWTs for client credentials in workload orchestration systems to improve interoperability in orchestration systems, to reduce complexity for developers, and motivates authorization server to support RFC 7523.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
 </section>
 <div id="status-of-memo">
 <section id="section-boilerplate.1">
@@ -1105,7 +1104,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 28 December 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 9 January 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1178,7 +1177,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
       <h2 id="name-introduction">
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
-<p id="section-1-1">In workload scenarios dedicated management entities, also called  "control plane" entities, are used to start, monitor and stop workloads dynamically.
+<p id="section-1-1">In workload scenarios dedicated management entities, also called "control plane" entities, are used to start, monitor and stop workloads dynamically.
 These workloads typically run micro services that interact with each other and with other entities on the corporate network or on the Internet.
 When one workload, acting as an OAuth client, wants to gain access to a protected resource hosted on another workload or on the Internet (referred here generically as a resource server) then authorization is typically required.<a href="#section-1-1" class="pilcrow">¶</a></p>
 <p id="section-1-2">OAuth has been designed to offer help in scenarios where access to protected resources needs to be managed dynamically in a distributed system.<a href="#section-1-2" class="pilcrow">¶</a></p>
@@ -1186,14 +1185,14 @@ When one workload, acting as an OAuth client, wants to gain access to a protecte
 However, these credentials have to be configured prior and are then attached to the workload.
 In addition, these credentials do not have an automated rotation mechanism and are valid for an unspecified amount of time.<a href="#section-1-3" class="pilcrow">¶</a></p>
 <p id="section-1-4">This requires manual configuration effort and the missing automated rotation mechanism introduce inconvenience and increase the attack surface.<a href="#section-1-4" class="pilcrow">¶</a></p>
-<p id="section-1-5">"Service account token volume projection" is a feature of container orchestration systems that allows users to create JSON Web Tokens (JWTs) for their workloads.
+<p id="section-1-5">"Service account token volume projection" is a feature of workload orchestration systems that allows users to create JSON Web Tokens (JWTs) for their workloads.
 These JWTs, referred as Service Account Tokens, can be used as client credentials, as specified in RFC 7523 <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>.
 As these tokens are managed by the "control plane" and simply mounted to the filesystem, a workload just needs to consume this file and present it to the authorization server.
 In addition, service account token volume projection allows an expiration time on these JWTs to be set, allowing automated rotation of these credentials.
 Finally, the private key for signing these tokens is managed by the "control plane", hence removing the manual effort of configuring the client_id and client_secret.<a href="#section-1-5" class="pilcrow">¶</a></p>
-<p id="section-1-6">However, there is currently no standardized way to manage these Service Account Tokens across container orchestrators.
+<p id="section-1-6">However, there is currently no standardized way to manage these Service Account Tokens across workload orchestrators.
 This leads to inconsistencies, and additional effort for developers as they need to support different client authentication mechanisms. In the worst case, this approach is ignored in favor of client_id and client_secret.<a href="#section-1-6" class="pilcrow">¶</a></p>
-<p id="section-1-7">This specification specifies the use of Service Account Tokens in container orchestration systems, which provides a secure and scalable way to create and manage these tokens, and ensures interoperability with existing OAuth-based authorization systems.<a href="#section-1-7" class="pilcrow">¶</a></p>
+<p id="section-1-7">This specification specifies the use of Service Account Tokens in workload orchestration systems, which provides a secure and scalable way to create and manage these tokens, and ensures interoperability with existing OAuth-based authorization systems.<a href="#section-1-7" class="pilcrow">¶</a></p>
 <p id="section-1-8">When OAuth is used as part of the control plane entities, a Service Account Token is provisioned to the workload via the Agent. This interaction is shown in <a href="#fig-arch" class="auto internal xref">Figure 1</a>.<a href="#section-1-8" class="pilcrow">¶</a></p>
 <p id="section-1-9">To distinguish the entities, we use the term "Control Plane" to refer to the OAuth 2.0 Authorization Server that is part
 of the cluster's control plane. Since there are also two access tokens in play, we use the term "Service Account Token" to refer to the token issued by the Control Plane and thereby distinguish it from the other access token issued to an OAuth 2.0 client running inside the workload by the second authorization server.<a href="#section-1-9" class="pilcrow">¶</a></p>
@@ -1260,6 +1259,8 @@ content of the tokens and the offered security properties.<a href="#section-1-13
 "OPTIONAL" in this document are to be interpreted as described in
 BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they appear in all
 capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<p id="section-2-2">The term container is sometimes used instead of workloads. These two
+terms can be used interchangably.<a href="#section-2-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="recommendations">
@@ -1269,7 +1270,7 @@ capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
       </h2>
 <p id="section-3-1">This specification relies on the use of OAuth 2.0 <span>[<a href="#RFC6749" class="cite xref">RFC6749</a>]</span> and
 <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span> for client authentication using a JWT.<a href="#section-3-1" class="pilcrow">¶</a></p>
-<p id="section-3-2">Service Account Tokens used in container orchestration systems are vulnerable to different types of threats, as shown in this list:<a href="#section-3-2" class="pilcrow">¶</a></p>
+<p id="section-3-2">Service Account Tokens used in workload orchestration systems are vulnerable to different types of threats, as shown in this list:<a href="#section-3-2" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-3-3">
 <li id="section-3-3.1">
           <p id="section-3-3.1.1">Token theft: Tokens can be stolen by attackers who have already gained access to a workload. These attackers can then use these tokens to impersonate the workload and gain access to resources they should not have access to.<a href="#section-3-3.1.1" class="pilcrow">¶</a></p>
@@ -1281,13 +1282,13 @@ capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
           <p id="section-3-3.3.1">Misconfigured service accounts: Similar to misconfigured access to secrets, misconfigured service accounts can lead to applications gaining more privileges then necessary.<a href="#section-3-3.3.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-3-3.4">
-          <p id="section-3-3.4.1">Theft of token signing key: The token signing key can be stolen by attackers who have already gained access to the control plane. However, such attackers also have access to all secrets in the container orchestration system. Hence, resulting in the same impact for use of client_id and client_secret compared to using Service Account Tokens.<a href="#section-3-3.4.1" class="pilcrow">¶</a></p>
+          <p id="section-3-3.4.1">Theft of token signing key: The token signing key can be stolen by attackers who have already gained access to the control plane. However, such attackers also have access to all secrets in the workload orchestration system. Hence, resulting in the same impact for use of client_id and client_secret compared to using Service Account Tokens.<a href="#section-3-3.4.1" class="pilcrow">¶</a></p>
 </li>
       </ol>
 <p id="section-3-4">The following fields are populated in the Service Account Token:<a href="#section-3-4" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-3-5">
 <li id="section-3-5.1">
-          <p id="section-3-5.1.1">The 'iss' claim MUST contain a string identifying the container orchestrator.<a href="#section-3-5.1.1" class="pilcrow">¶</a></p>
+          <p id="section-3-5.1.1">The 'iss' claim MUST contain a string identifying the worklod orchestrator.<a href="#section-3-5.1.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-3-5.2">
           <p id="section-3-5.2.1">The 'sub' claim MUST contain a string identifying the workload. This is also the client_id according to <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>.<a href="#section-3-5.2.1" class="pilcrow">¶</a></p>
@@ -1513,7 +1514,7 @@ spec:
 <div dir="auto" class="left"><span class="org">Siemens</span></div>
 <div class="email">
 <span>Email:</span>
-<a href="mailto:hannes.tschofenig@siemens.com" class="email">hannes.tschofenig@siemens.com</a>
+<a href="mailto:hannes.tschofenig@gmx.net" class="email">hannes.tschofenig@gmx.net</a>
 </div>
 </address>
 <address class="vcard">

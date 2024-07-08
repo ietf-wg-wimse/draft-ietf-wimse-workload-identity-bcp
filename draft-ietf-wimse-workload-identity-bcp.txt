@@ -5,28 +5,29 @@
 WIMSE                                                         B. Hofmann
 Internet-Draft                                             H. Tschofenig
 Intended status: Standards Track                                 Siemens
-Expires: 28 December 2024                                    E. Giordano
+Expires: 9 January 2025                                      E. Giordano
                                                                    Nokia
                                                             Y. Rosomakho
                                                                  Zscaler
                                                       A. Schwenkschuster
                                                                Microsoft
-                                                            26 June 2024
+                                                             8 July 2024
 
 
-              Best Current Practice for Workload Identity
+ Best Current Practice for OAuth 2.0 Client Authentication in Workload
+                              Environments
              draft-ietf-wimse-workload-identity-bcp-latest
 
 Abstract
 
-   The use of the OAuth 2.0 framework for container orchestration
-   systems poses a challenge as managing secrets, such as client_id and
+   The use of the OAuth 2.0 framework for workload orchestration systems
+   poses a challenge as managing secrets, such as client_id and
    client_secret, can be complex and error-prone.  "Service account
    token volume projection", a term introduced by Kubernetes, provides a
    way of injecting JSON Web Tokens (JWTs) to workloads.
 
    This document specifies the use of JWTs for client credentials in
-   container orchestration systems to improve interoperability in
+   workload orchestration systems to improve interoperability in
    orchestration systems, to reduce complexity for developers, and
    motivates authorization server to support RFC 7523.
 
@@ -45,7 +46,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 28 December 2024.
+   This Internet-Draft will expire on 9 January 2025.
 
 Copyright Notice
 
@@ -100,7 +101,7 @@ Table of Contents
    rotation mechanism introduce inconvenience and increase the attack
    surface.
 
-   "Service account token volume projection" is a feature of container
+   "Service account token volume projection" is a feature of workload
    orchestration systems that allows users to create JSON Web Tokens
    (JWTs) for their workloads.  These JWTs, referred as Service Account
    Tokens, can be used as client credentials, as specified in RFC 7523
@@ -114,14 +115,14 @@ Table of Contents
    configuring the client_id and client_secret.
 
    However, there is currently no standardized way to manage these
-   Service Account Tokens across container orchestrators.  This leads to
+   Service Account Tokens across workload orchestrators.  This leads to
    inconsistencies, and additional effort for developers as they need to
    support different client authentication mechanisms.  In the worst
    case, this approach is ignored in favor of client_id and
    client_secret.
 
    This specification specifies the use of Service Account Tokens in
-   container orchestration systems, which provides a secure and scalable
+   workload orchestration systems, which provides a secure and scalable
    way to create and manage these tokens, and ensures interoperability
    with existing OAuth-based authorization systems.
 
@@ -197,12 +198,15 @@ Table of Contents
    14 [RFC2119] [RFC8174] when, and only when, they appear in all
    capitals, as shown here.
 
+   The term container is sometimes used instead of workloads.  These two
+   terms can be used interchangably.
+
 3.  Architecture and Recommendations
 
    This specification relies on the use of OAuth 2.0 [RFC6749] and
    [RFC7523] for client authentication using a JWT.
 
-   Service Account Tokens used in container orchestration systems are
+   Service Account Tokens used in workload orchestration systems are
    vulnerable to different types of threats, as shown in this list:
 
    1.  Token theft: Tokens can be stolen by attackers who have already
@@ -221,13 +225,13 @@ Table of Contents
    4.  Theft of token signing key: The token signing key can be stolen
        by attackers who have already gained access to the control plane.
        However, such attackers also have access to all secrets in the
-       container orchestration system.  Hence, resulting in the same
+       workload orchestration system.  Hence, resulting in the same
        impact for use of client_id and client_secret compared to using
        Service Account Tokens.
 
    The following fields are populated in the Service Account Token:
 
-   1.  The 'iss' claim MUST contain a string identifying the container
+   1.  The 'iss' claim MUST contain a string identifying the worklod
        orchestrator.
 
    2.  The 'sub' claim MUST contain a string identifying the workload.
@@ -414,7 +418,7 @@ Authors' Addresses
 
    Hannes Tschofenig
    Siemens
-   Email: hannes.tschofenig@siemens.com
+   Email: hannes.tschofenig@gmx.net
 
 
    Edoardo Giordano
