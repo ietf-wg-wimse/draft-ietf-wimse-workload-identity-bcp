@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-07-07T00:50:07.431436+00:00",
+  "timestamp": "2024-07-09T00:44:54.939868+00:00",
   "repo": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
   "labels": [
     {
@@ -172,24 +172,26 @@
       "id": "PR_kwDOL34A-M5zFh4o",
       "title": "My take on the problem/introduction",
       "url": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp/pull/4",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "arndt-s",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Taking our last conversation into account I wanted to contribute my take on the problem and wrote the introduction the way I see it.  \r\n\r\nThis is not a version that can be merged, but the best way to show it in a diff and allow comments. Let me know what you think.",
       "createdAt": "2024-06-20T15:05:06Z",
-      "updatedAt": "2024-06-21T11:21:05Z",
+      "updatedAt": "2024-07-08T13:52:32Z",
       "baseRepository": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
       "baseRefName": "main",
-      "baseRefOid": "0c3a08ceddab7490694f3746f4066c12882645a3",
+      "baseRefOid": "343aa8df21d1187e0511870971a344d535bfdcdb",
       "headRepository": "arndt-s/draft-ietf-wimse-workload-identity-bcp",
       "headRefName": "main",
-      "headRefOid": "4f88d6a561f8b067110f159e695aaaa099238415",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "08f18ed5fd7f052c5f944245711f5aba22ca0d8f",
+      "closedAt": "2024-07-08T13:52:31Z",
+      "mergedAt": "2024-07-08T13:52:31Z",
+      "mergedBy": "hannestschofenig",
+      "mergeCommit": {
+        "oid": "3f35d75fe88cd55eda3050586543e30e023c243e"
+      },
       "comments": [],
       "reviews": [
         {
