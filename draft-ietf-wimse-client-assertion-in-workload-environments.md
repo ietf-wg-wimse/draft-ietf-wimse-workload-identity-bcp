@@ -1,8 +1,8 @@
 ---
-title: Best Current Practice for OAuth 2.0 Client Authentication in Workload Environments
+title: OAuth 2.0 Client Assertion in Workload Environments
 abbrev: Workload Identity
-docname:  draft-ietf-wimse-workload-identity-bcp-latest
-category: std
+docname:  draft-ietf-wimse-client-assertion-in-workload-environments-latest
+category: info
 
 ipr: trust200902
 area: Security
@@ -55,6 +55,7 @@ author:
 
 normative:
   RFC2119:
+  RFC7521:
   RFC7523:
   RFC6749:
   RFC8174:
@@ -69,74 +70,60 @@ informative:
 
 --- abstract
 
-The use of the OAuth 2.0 framework for container orchestration systems poses a challenge as managing secrets, such as client_id and client_secret, can be complex and error-prone. "Service account token volume projection", a term introduced by Kubernetes, provides a way of injecting JSON Web Tokens (JWTs) to workloads.
+The use of the OAuth 2.0 framework for container orchestration systems poses a challenge as managing secrets, such as client_id and client_secret, can be complex and error-prone. Instead of manual provisioning these credentials the industry has moved to a federation-based approach where credentials of the underlying workload platform are used as assertions towards an OAuth authorization server leveraging the Client Assertion Flow {{RFC7521}}, in particular {{RFC7523}}.
 
-This document describes the current best practices to avoid client_secret provisioning and leverage platform attestation to receive access tokens from an OAuth 2.0 authorization server via RFC 7523.
+This approach is seen in the industry across many workload environments, this document outlines common patterns and their use cases.
 
 --- middle
 
 # Introduction
 
-<!-- Introduce the environment -->
-In workload scenarios dedicated management entities, also referred to as "control plane" entities, are used to start, monitor and stop workloads dynamically. These workloads frequently interact with each other and other entities within the corporate network or online. When one workload, acting as an OAuth client, wants to gain access to a protected resource hosted on another workload or on the Internet (referred here generically as a resource server) then authorization is typically required.
-
 <!-- The challenge -->
-To authenticate workloads accessing resources, each workload instance requires unique credentials. This poses challenges in environments where workloads start, stop, relocate, and scale dynamically. Manual configuration, rotation, and management efforts can result in management overhead at best and security risks such as credential exposure at worst.
+Workloads often require access to external resources to perform their tasks. For example, access to a database, a web server or another workload. These resources are protected by an authorization server and can only be accessed with an access token. The challenge for workloads is to get this access token issued.
 
+Traditionally, workloads can be provisioned with client secrets credentials and use the client_credential flow to retrieve an access token. This model comes with a set of challenges that make it insecure and high-maintaince. Client secrets need to be manually provisioned and rotated. They can be stolen and used by attackers to impersonate the workload.
 
-<!-- What are service account tokens and what are their attributes -->
-"Service account token volume projection" is a feature in the Kubernetes container orchestration system that enables users to attach platform-attested tokens to their workloads. Workloads use these tokens to authenticate themselves to APIs within the platform's control plane. While this token is used for access, it functions more like an ID Token rather than an Access Token in the OAuth context. Workloads do not receive a refresh token, and there is no involvement of authorization or consent; it simply serves as proof of the workload's identity. Workloads have several methods to obtain such tokens from Kubernetes, including through the TokenRequest API invoked by business logic or Token volume projection, which mounts the token into the workload's file system and ensures it remains up-to-date. Token volume projection offers the advantage of requiring no manual intervention by the application beyond reading a file.
-
-<!-- How Service Account Tokens can be/are used in combination with RFC 7523 to access OAuth2 protected resources -->
-Initially designed to authenticate access to the control plane API, the industry has recognized the service account token for its low maintenance and platform attestation capabilities and has started using it as a JWT client assertion, as specified in {{RFC7523}}. This token is presented to an authorization server as a client assertion. The authorization server validates the assertion's signature using {{OIDC}} metadata or {{RFC8414}} and uses the claims within the token to authenticate the client. Overall, the authorization server trusts the platform control plane for issuing and delivering these credentials. The authorization server then responds with an Access Token that the workload can use to access an OAuth2-protected resource on a resource server.
-
-{{fig-arch}} illustrates the interaction in the architecture graphically.
+A solution to this problem is to not provision secret material to the workload itself but use the workload platform to attest for that workload. Many workload platforms offer a credential, in most cases a JWT token. Signed by a platform-internal authorization server, this credential attests the workload and its attributes. Based on {{RFC7521}} and its JWT profile {{RFC7523}}, this credential can then be used as a client assertion towards a different authorization server. {{fig-overview}} illustrates this interaction.
 
 ~~~
-                      +---------------+
-                      |               |
-                      | Authorization |
-                      | Server        |
-                      |               |
-                      +---------------+
-                             ^ |
-                             | |
-  +--------------------------|-|--------------+
-  |Cluster                   | | OAuth        |
-  |                          | | Exchange     |
-  | +---------------+        | | to obtain    |
-  | |               |        | | access token |
-  | | Control Plane |        | | using        |
-  | |               |        | | Service      |
-  | +---------------+        | | Account      |
-  |         ^|               | | Token        |
-  |         ||               | v        +-----+
-  |         ||            +----------+  |
-  |         ||            |          |+ |        +----------+
-  |  Obtain ||            | Workload || |        |          |
-  |  Service||            |          ||<-------->| Resource |
-  |  Account||            +----------+| | Access | Server   |
-  |  Token  ||             +----------+ | Token  |          |
-  |         ||                  ^       |        +----------+
-  |         ||    Start Workload:       |
-  |         ||     with Service :       |
-  |         ||    Account Token :       |
-  |         ||                  v       |
-  |         ||              +-------+   |
-  |         |+------------->|       |   |
-  |         +---------------| Agent |   |
-  |                         |       |   |
-  |                         +-------+   |
-  |                                     |
-  +-------------------------------------+
+┌──────────────────────────────────────────────────────────┐
+│                           External Authorization Domain  │
+│                                                          │
+│ ┌─────────────────────────┐     ┌────────────────────┐   │
+│ │                         │     │                    │   │
+│ │   Authorization Server  │     │  Resource Server   │   │
+│ │                         │     │                    │   │
+│ └────────────┬────────────┘     └────────────▲───────┘   │
+│              │                               │           │
+└──────────────┼───────────────────────────────┼───────────┘
+               │                               │
+     2) present assertion                 3) access
+               │                               │
+               │     ┌─────────────────────────┘
+               │     │
+┌──────────────┼─────┼─────────────────────────────────────┐
+│              │     │                  Workload Platform  │
+│              │     │                                     │
+│  ┌───────────┴─────┴───┐           ┌──────────────────┐  │
+│  │                     │           │ Credential       │  │
+│  │  Workload           ├───────────► issued by        │  │
+│  │                     │  1) get   │ Platform         │  │
+│  └─────────────────────┘           └──────────────────┘  │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
 ~~~
-{: #fig-arch title="Protocol Interaction."}
+{: #fig-overview title="OAuth2 Assertion Flow in generic Workload Environment"}
 
-This specification defines the utilization of Service Account Tokens within container orchestration systems, providing a secure and scalable method for creating and managing these tokens while ensuring interoperability with existing OAuth-based authorization systems.
+The figure outlines the following steps which are applicable in any pattern.
 
-To distinguish between entities, we refer to the OAuth 2.0 Authorization Server within the cluster's control plane as the "Control Plane." Given the presence of two distinct access tokens, we specifically designate the token issued by the Control Plane as the "Service Account Token," thereby differentiating it from the access token issued to an OAuth 2.0 client operating within the workload by a separate authorization server.
+* 1) retrieve credential issued by platform. The way this is acchieved and whether this is workload or platform initiated differs based on the platform.
 
-In {{recommendations}}, further details are provided regarding the token content and the associated security properties.
+* 2) present credential as an assertion towards an authorization server in an external authorization domain. This step uses the assertion_grant flow defined in {{RFC7521}} and, in case of JWT format, {{RFC7523}}. As a result of this flow, an access token is returned to the workload.
+
+* 3) use access token from the previous step to access a protected resource in the external authorization domain.
+
+This specifiation defines this flow in more detail based on common pattern seen in the industry and gives reccomendations.
 
 # Terminology
 
@@ -148,25 +135,281 @@ capitals, as shown here.
 
 The terms 'workload' and 'container' are used interchangeably.
 
-# Recommendations {#recommendations}
+# Patterns {#patterns}
 
-This specification relies on the use of OAuth 2.0 {{RFC6749}} and
-{{RFC7523}} for client authentication using a JWT.
+## Kubernetes {#kubernetes}
 
-Service Account Tokens used in container orchestration systems are vulnerable to various threats, as outlined below:
+Kubernetes notion of identity is mainly the concept of "service accounts" which are either created explictly or automatically during deployment time. While the mean purpose of these identities is to authenticate access to the Kubernetes Control Plane it is more and more used to authenticate workloads between each other too. The credential format used to authenticate service account is JWT that are signed by the Kubernetes Control Plane.
 
-1. Token theft: Attackers who compromise a workload can steal tokens to impersonate it and gain unauthorized access to resources.
-2. Token reuse: Stolen tokens may be reused within their expiration period to gain repeated unauthorized access. However, the expiration time limits the token reuse time window.
-3. Misconfigured service accounts: mproperly configured service accounts can grant applications excessive privileges.
-4. Theft of token signing key: Attackers gaining control plane access can steal the token signing key, akin to compromising client_id and client_secret in OAuth, potentially accessing all secrets in the orchestration system.
+To programatically use service account tokens workloads can
 
-The following fields are populated in the Service Account Token:
+* use the TokenRequest API of the control plane
 
-1. The 'iss' claim MUST contain a string identifying the worklod orchestrator.
-2. The 'sub' claim MUST contain a string identifying the workload, also serving as the client_id per {{RFC7523}}.
-3. The 'aud' claim MUST identify one or multiple authorization servers intended to receive and authorize the Service Account Token.
+* have the token projected into the file system of the workload. This is commonly referred to as "projected service accout token".
 
-Additional processing requirements are specified in {{RFC7523}}.
+Both options allow workloads to
+
+* specify a custom audience. Possible audiences can be restricted based on control plane policy.
+
+* specify a custom lifetime. (TODO, is policy possible?)
+
+* bind the token lifetime to an object lifecycle. This allows the token to be invalidated when the object is deleted. For example, when a Kubernetes Deployment is removed from the server. It is important to highlight, that invalidation is only in effect if the TokenReview API of Kubernetes is used to validate the token.
+
+To validate service account tokens, Kubernetes offers workloads to
+
+* mount the public keys used to sign the tokens into the file system of the workload. This allows workloads to decentrally validate the tokens signature.
+
+* make us of the TokenReview API. This API introspects the token, makes sure it hasn't been invalidated and returns the claims.
+
+* Optionally, a JSON Web Key Set is exposed via a webserver. This allows the Service Account Token to be validated outside of the cluster and without line of sight towards the actual Kubernetes Control Plane API.
+
+~~~
+┌───────────────────────────────────────────────────────┐
+│                                  Authorization Domain │
+│                                                       │
+│ ┌──────────────────────────┐ ┌────────────────────┐   │
+│ │                          │ │                    │   │
+│ │   Authorization Server   │ │  Resource Server   │   │
+│ │                          │ │                    │   │
+│ └────────────▲─────────────┘ └──────────▲─────────┘   │
+│              │                          │             │
+└──────────────┼──────────────────────────┼─────────────┘
+               │                          │
+      3) present assertion            4) access
+               │                          │
+┌──────────────┼──────────────────────────┼─────────────┐
+│              │             ┌────────────┘  Kubernetes │
+│              │             │                  Cluster │
+│    ┌─────────┴─────────────┴────┐                     │
+│    │                            │                     │
+│    │    Workload                │                     │
+│    │                            │                     │
+│    └────▲────────────────▲──────┘                     │
+│         │                │                            │
+│         │                │                            │
+│    1) schedule     2) project service                 │
+│         │             account token                   │
+│         │                │                            │
+│   ┌─────┴────────────────┴───────────────────┐        │
+│   │                                          │        │
+│   │        Kubernetes Control Plane          │        │
+│   │                                          │        │
+│   └──────────────────────────────────────────┘        │
+│                                                       │
+└───────────────────────────────────────────────────────┘
+~~~
+{: #fig-kubernetes title="OAuth2 Assertion Flow in a Kubernetes Workload Environment"}
+
+The steps shown in {{fig-kubernetes}} are:
+
+* 1) The Kubernetes Control Plane schedules the workload. This is much simplified and technically happens asynchronously.
+
+* 2) The Kubernetes Control Plane projects the service account token into the workload. This step is also much simplified and technically happens alongside the scheduling with step 1.
+
+* 3) Workloads present the project service account token as a client assertion towards an external authorization server according to {{RFC7523}}. An access token is returned to the workload as a result.
+
+* 4) The access token issued by the external authorization server is used by the workload to access the projected resource.
+
+As an example, the following JSON showcases the claims a Kubernetes Service Account token carries.
+
+~~~json
+{
+  "aud": [  # matches the requested audiences, or the API server's default audiences when none are explicitly requested
+    "https://kubernetes.default.svc"
+  ],
+  "exp": 1731613413,
+  "iat": 1700077413,
+  "iss": "https://kubernetes.default.svc",  # matches the first value passed to the --service-account-issuer flag
+  "jti": "ea28ed49-2e11-4280-9ec5-bc3d1d84661a",  # ServiceAccountTokenJTI feature must be enabled for the claim to be present
+  "kubernetes.io": {
+    "namespace": "kube-system",
+    "node": {  # ServiceAccountTokenPodNodeInfo feature must be enabled for the API server to add this node reference claim
+      "name": "127.0.0.1",
+      "uid": "58456cb0-dd00-45ed-b797-5578fdceaced"
+    },
+    "pod": {
+      "name": "coredns-69cbfb9798-jv9gn",
+      "uid": "778a530c-b3f4-47c0-9cd5-ab018fb64f33"
+    },
+    "serviceaccount": {
+      "name": "coredns",
+      "uid": "a087d5a0-e1dd-43ec-93ac-f13d89cd13af"
+    },
+    "warnafter": 1700081020
+  },
+  "nbf": 1700077413,
+  "sub": "system:serviceaccount:kube-system:coredns"
+}
+~~~
+{: #fig-kubernetes-token title="Example Kubernetes Service Account Token claims"}
+
+## Secure Production Identity Framework For Everyone (SPIFFE) {#spiffe}
+
+Secure Production Identity Framework For Everyone, also known as SPIFFE, is a cloud native compute foundation (CNCF) adopted project which defines an API definitioned called "Workload API" to delivery machine identity to workloads. Workloads can retrieve either X509 based or JWT credentials without the need to authenticate making it very easy to use. How workloads authenticate on the API is not part of the specification. It is common to use platform metadata from the operating system and the workload platform for authentication on the Workload API.
+
+For the scope of this document, the JWT formatted credential is the most relevant one. SPIFFE referres to it as "JWT-SVID" (JWT - Single Verifyable Identity Document).
+
+Workloads are required to specify at least one audience when requesting a JWT-SVID from the Workload API.
+
+To allow validation, SPIFFE offers
+
+* to download a set JWK encoded public keys that can be used to validate JWT signatures. In SPIFFE this is referred to as the "JWT trust bundle".
+
+* invoke a validation method on the Workload API to validate JWT-SVIDs
+
+Additionally, many SPIFFE deployments choose to separately publish the signing keys as a JSON Web Key Set on a web server to allow validation where the Workload API is not available.
+
+The following figure illustrates how a workload can use its JWT-SVID to access a protected resource outside of SPIFFE.
+
+~~~
+┌───────────────────────┐   ┌──────────────────────┐
+│                       │   │                      │
+│ Authorization Server  │   │  Protected Resource  │
+│                       │   │                      │
+└──────────▲────────────┘   └───────────▲──────────┘
+           │                            │
+  2) present assertion              3) access
+           │                            │
+┌──────────┴────────────────────────────┴──────────┐
+│                                                  │
+│                     Workload                     │
+│                                                  │
+└────────────────────────┬─────────────────────────┘
+                         │
+                  1) get JWT-SVID
+                         │
+┌────────────────────────▼─────────────────────────┐
+│                                                  │
+│                SPIFFE Workload API               │
+│                                                  │
+└──────────────────────────────────────────────────┘
+~~~
+{: #fig-spiffe title="OAuth2 Assertion Flow in a SPIFFE Environment"}
+
+The steps shown in {{fig-spiffe}} are:
+
+* 1) The workload retrieves JWT-SVID from the SPIFFE Workload API.
+
+* 2) The workload presents the JWT-SVID as a client assertion in the assertion flow based on {{RFC7523}}. An access token is returned to the workload.
+
+* 3) The access token returned in the previous step is used by the workload to access a protected resource.
+
+The claims of a JWT-SVID for example looks like this.
+
+~~~json
+{
+  "aud": [
+    "my-audience"
+  ],
+  "exp": 1729087175,
+  "iat": 1729086875,
+  "sub": "spiffe://example.org/myservice"
+}
+~~~
+
+## Cloud Providers {#cloudproviders}
+
+Workload in cloud platforms can have any shape or form. Historically, virtual machines were the most common, with the introduction of containerization, hosted container environment or Kubernetes clusters were introduced, and lately, `serverless` functions are offered. Regardless of the actual workload packaging, distribution and runtime platform, all are in need of identity.
+
+To create a common identity interface across cloud services and offerings, the pattern of an `Instance Metadata Endpoint` has been established by the biggest cloud providers. Next to the option for workloads to get metadata about themselves, it also allows them to receive identity. The credential types offered can vary. JWT, however, is the one that is common across all of them. The issued credential allows proof to anyone it is being presented to, that the workload platform has attested the workload and it can be considered authenticated.
+
+Within a cloud provider the issued credential can often directly be used to access resources of any kind across the platform making integration between the services easy and `credential less`. While the term is technically missleading, from a user perspective, no credential needs to be issued, provisioned, rotated or revoked, as everything is handled internally by the platform.
+
+Resources outside of the platform, for example resources or workloads in other clouds, generic web servers or on-premise resources, are most of the time, however, protected by different domains and authorization servers and deny the platform issued credential. In this scenario, the pattern of using the platform issued credential as an assertion in the context of {{RFC7521}}, for JWT particularly {{RFC7523}} towards the authorization server that protected the resource to get an access token.
+
+~~~
+┌───────────────────────────────────────────────────┐
+│                     External Authorization Domain │
+│                                                   │
+│ ┌──────────────────────┐  ┌─────────────────────┐ │
+│ │                      │  │                     │ │
+│ │ Authorization Server │  │ Protected Resource  │ │
+│ │                      │  │                     │ │
+│ └───────────▲──────────┘  └──────────▲──────────┘ │
+│             │                        │            │
+└─────────────┼────────────────────────┼────────────┘
+              │                        │
+              │                        │
+    B1) present assertion          B2) access
+              │                        │
+              │    ┌───────────────────┘
+┌─────────────┼────┼────────────────────────────────┐
+│             │    │                          Cloud │
+│             │    │                                │
+│   ┌─────────┴────┴───┐  1) get       ┌──────────┐ │
+│   │                  │     identity  │          │ │
+│   │  Workload        ├───────────────► Instance │ │
+│   │                  │               │          │ │
+│   └─────────┬────────┘               │ Metadata │ │
+│             │                        │          │ │
+│         A1) access                   │ Service/ │ │
+│             │                        │ Endpoint │ │
+│   ┌─────────▼────────────┐           │          │ │
+│   │                      │           └──────────┘ │
+│   │  Protected Resource  │                        │
+│   │                      │                        │
+│   └──────────────────────┘                        │
+└───────────────────────────────────────────────────┘
+~~~
+{: #fig-cloud title="OAuth2 Assertion Flow in a cloud environment"}
+
+The steps shown in {{fig-cloud}} are:
+
+* 1) The workload retrieves identity from the Instance Metadata Endpoint.
+
+In case the workload needs to access a resource within the cloud (protected by the same authorization server that issued the workload identity)
+
+* A1) The workload directly access the protected resource with the credential issued in step 1.
+
+In case the workload needs to access a resource outside of the cloud (protected by a different authorization server). This can also be the same cloud but different context (tenant, account).
+
+* B1) The workload presents cloud-issued credential as an assertion towards the external authorization server using {{RFC7523}}. An access token is returned to the workload.
+
+* B2) Using the access token from step B1, the workload is able to access the protected resource in the external authorization domain.
+
+## Continues integration/deployment systems {#cicd}
+
+Continous integration and deployment systems allow their pipelines/workflows to receive identity every time they run. Particularly in situations where build outputs need to be uploaded to resources protected by other authorization server, deployments need to be made, or more generally, protected resources to be accessed, {{RFC7523}} is used to federate the pipeline/workflow identity to an identity of the other authorization server.
+
+~~~
+┌──────────────────────────────────────────────────────────┐
+│                            External Authorization Domain │
+│                                                          │
+│ ┌──────────────────────────┐     ┌─────────────────────┐ │
+│ │                          │     │                     │ │
+│ │   Authorization Server   │     │  Protected Resource │ │
+│ │                          │     │                     │ │
+│ └───────────▲──────────────┘     └────────────▲────────┘ │
+│             │                                 │          │
+└─────────────┼─────────────────────────────────┼──────────┘
+              │                                 │
+     3) present assertion                  4) access
+              │                                 │
+┌─────────────┴─────────────────────────────────┴──────────┐
+│                    Task (Workload)                       │
+└────────▲───────────────────────────┬─────────────────────┘
+         │                           │
+   1) schedules                2) retrieve identity
+         │                           │
+┌────────┴───────────────────────────▼─────────────────────┐
+│                                                          │
+│       Continuous Integration / Deployment Platform       │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+~~~
+{: #fig-cicd title="OAuth2 Assertion Flow in a continous integration/deployment environment"}
+
+The steps shown in {{fig-cicd}} are:
+
+* 1) The continuous integration / deployment platform (CI-CD platform) schedules a task (considered a workload) to be performed.
+
+* 2) The workload is able to retrieve identity from the CI-CD platform. This can differ based on the platform and potentially is already supplied during scheduling phase in step 1.
+
+* 3) The workload presents the CI-CD issued credential as an assertion towards the authorization server in the external authorization domain based on {{RFC7521}}. In case of JWT also {{RFC7523}}. The authorization server returns an access token to the workload.
+
+* 4) Using the access token from step 3, the workload is able to access the protected resource in the external authorization domain.
+
+Tokens of different providers look different, but all of them contain claims carrying the basic context of the executed tasks such as source code management data (e.g. git branch), initiation and more.
 
 # Security Considerations
 
@@ -181,115 +424,3 @@ This document does not require actions by IANA.
 Add your name here.
 
 --- back
-
-# Example
-
-The functionality described in this specification can be verified using Kubernetes. Modern version of Kubernetes implement service account token volume projection, which enables the ability to inject the Service Account Token with a specific issuer and audience into the workload.
-
-A most important parts of the configuration are (which can be found at the end of the full configuration):
-
-   1. the path, where the application can find the token, as a file
-   2. the expiration of the token in seconds
-   3. the audience, which will be in the Service Account Token
-
-~~~yaml
-serviceAccountToken:
-  path: token
-  expirationSeconds: 7200
-  audience: "https://localhost:5001/connect/token"
-~~~
-
-The full configuration is shown below:
-
-~~~yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: simpleapp
-  labels:
-    app: simpleapp
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: simpleapp
-  template:
-    metadata:
-      labels:
-        app: simpleapp
-    spec:
-      containers:
-        - name: container1
-          image: curlimages/curl:8.2.1
-          imagePullPolicy: Always
-          command:
-            - sleep
-            - "3600"
-          env:
-            - name: TOKEN_PATH
-              value: '/var/run/secrets/other_token/token/token'
-          volumeMounts:
-            - mountPath: '/var/run/secrets/other_token/token'
-              name: other-token-path
-      volumes:
-        - name: other-token-path
-          projected:
-            sources:
-            - serviceAccountToken:
-                path: token
-                expirationSeconds: 7200
-                audience: "https://localhost:5001/connect/token"
-~~~
-
-The most important parts of the token, which the workload will obtain, looks as follows:
-
-~~~json
-{
-  "aud": [
-    "https://localhost:5001/connect/token"
-  ],
-  "exp": 1691752299,
-  "iss": "https://kubernetes.default.svc.cluster.local",
-  "sub": "system:serviceaccount:test:default"
-}
-~~~
-
-A complete token example obtained by the workload is shown below.
-
-~~~json
-{
-  "aud": [
-    "https://localhost:5001/connect/token"
-  ],
-  "exp": 1691752299,
-  "iat": 1691745099,
-  "iss": "https://kubernetes.default.svc.cluster.local",
-  "kubernetes.io": {
-    "namespace": "test",
-    "pod": {
-      "name": "simpleapp-5d7dcf96df-n7csk",
-      "uid": "9fc443d7-5c7a-48d5-9679-0ee03b17d4c5"
-    },
-    "serviceaccount": {
-      "name": "default",
-      "uid": "0bea3006-fb60-49a3-bc80-7e6884d378ae"
-    }
-  },
-  "nbf": 1691745099,
-  "sub": "system:serviceaccount:test:default"
-}
-~~~
-
-To enable the authorization server to use the Service Account Token for client authentication the following configuration is needed:
-
-1. the client id is set to ``system:serviceaccount:test:default``. In our case we are using the default service account in the test namespace.
-2. the public key of the token signing key. This can be either configured manually, or dynamically by referencing the JWK endpoint Kubernetes exposes, which is https://kubernetes.default.svc.cluster.local/openid/v1/jwks
-
-Note: Authorization servers that follow the OpenID Connect Core specification, which profiles RFC 7523, will unfortunately run into problem. Here is the why.
-
-For JWT-based client authentication {{OIDC}} specifies the following:
-
-   1. The 'jti' claim is mandated for client authentication.
-   2. The 'iss' claim must match the 'sub' claim. Since Kubernetes issues the tokens, and not the workload, the two do not match.
-
-{{RFC7523}}, on the other hand, does not mandate the use of a 'jti' claim and does not mandate that the 'iss' claim  equals the 'sub' claim.
