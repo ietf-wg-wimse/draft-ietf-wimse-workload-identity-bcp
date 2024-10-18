@@ -93,52 +93,11 @@ This approach is seen in the industry across many workload environments, this do
 
 # Introduction
 
-<!-- The challenge -->
 Workloads often require access to external resources to perform their tasks. For example, access to a database, a web server or another workload. These resources are protected by an authorization server and can only be accessed with an access token. The challenge for workloads is to get this access token issued.
 
 Traditionally, workloads can be provisioned with client secrets credentials and use the client_credential flow to retrieve an access token. This model comes with a set of challenges that make it insecure and high-maintaince. Client secrets need to be manually provisioned and rotated. They can be stolen and used by attackers to impersonate the workload.
 
-A solution to this problem is to not provision secret material to the workload itself but use the workload platform to attest for that workload. Many workload platforms offer a credential, in most cases a JWT token. Signed by a platform-internal authorization server, this credential attests the workload and its attributes. Based on {{RFC7521}} and its JWT profile {{RFC7523}}, this credential can then be used as a client assertion towards a different authorization server. {{fig-overview}} illustrates this interaction.
-
-~~~ aasvg
-+----------------------------------------------------------+
-|                           External Authorization Domain  |
-|                                                          |
-| +-------------------------+     +--------------------+   |
-| |                         |     |                    |   |
-| |   Authorization Server  |     | Protected Resource |   |
-| |                         |     |                    |   |
-| +------------^------------+     +------------^-------+   |
-|              |                               |           |
-+--------------+-------------------------------+-----------+
-               |                               |
-     2) present assertion                 3) access
-               |                               |
-               |     +-------------------------+
-               |     |
-+--------------+-----+-------------------------------------+
-|              |     |                  Workload Platform  |
-|              |     |                                     |
-|  +-----------+-----+---+           +------------------+  |
-|  |                     |           | Credential       |  |
-|  |  Workload           +-----------> issued by        |  |
-|  |                     |  1) get   | Platform         |  |
-|  +---------------------+           +------------------+  |
-|                                                          |
-|                                                          |
-+----------------------------------------------------------+
-~~~
-{: #fig-overview title="OAuth2 Assertion Flow in generic Workload Environment"}
-
-The figure outlines the following steps which are applicable in any pattern.
-
-* 1) retrieve credential issued by platform. The way this is acchieved and whether this is workload or platform initiated differs based on the platform.
-
-* 2) present credential as an assertion towards an authorization server in an external authorization domain. This step uses the assertion_grant flow defined in {{RFC7521}} and, in case of JWT format, {{RFC7523}}. As a result of this flow, an access token is returned to the workload.
-
-* 3) use access token from the previous step to access a protected resource in the external authorization domain.
-
-This specifiation defines this flow in more detail based on common pattern seen in the industry and gives reccomendations.
+A solution to this problem is to not provision secret material to the workload itself but use the workload platform to attest for that workload. Many workload platforms offer a credential, in most cases a JWT token. Signed by a platform-internal authorization server, this credential attests the workload and its attributes. Based on {{RFC7521}} and its JWT profile {{RFC7523}}, this credential can then be used as a client assertion towards a different authorization server.
 
 # Terminology
 
@@ -149,6 +108,79 @@ BCP 14 {{RFC2119}} {{RFC8174}} when, and only when, they appear in all
 capitals, as shown here.
 
 The terms 'workload' and 'container' are used interchangeably.
+
+# OAuth Assertion in Workload Environments
+
+## Overview
+
+{{fig-overview}} illustrates a generic pattern that applies across all of the patterns described in {{patterns}}:
+
+~~~ aasvg
+ +----------------------------------------------------------+
+ |                           External Authorization Domain  |
+ |                                                          |
+ | +-------------------------+     +--------------------+   |
+ | |                         |     |                    |   |
+ | |   Authorization Server  |     | Protected Resource |   |
+ | |                         |     |                    |   |
+ | +-------^---------+-------+     +----------^---------+   |
+ +---------+---------+------------------------+-------------+
+           |         |                        |
+           |   3) access token           4) access
+           |         |                        |
+2) present assertion |                        |
+           |         |     +------------------+
+           |         |     |
+ +---------+---------+-----+--------------------------------+
+ |         |         |     |             Workload Platform  |
+ |         |         |     |                                |
+ |  +------+---------v-----+---+           +-------------+  |
+ |  |                          |           | Credential  |  |
+ |  |        Workload          +-----------> issued by   |  |
+ |  |                          |  1) get   | Platform    |  |
+ |  +--------------------------+           +-------------+  |
+ +----------------------------------------------------------+
+~~~
+{: #fig-overview title="OAuth2 Assertion Flow in generic Workload Environment"}
+
+The figure outlines the following steps which are applicable in any pattern.
+
+* 1) retrieve credential issued by platform. The way this is acchieved and whether this is workload or platform initiated differs based on the platform.
+
+* 2) present credential as an assertion towards an authorization server in an external authorization domain. This step uses the assertion_grant flow defined in {{RFC7521}} and, in case of JWT format, {{RFC7523}}.
+
+* 3) On success, an access token is returned to the workload to access the protected resource.
+
+* 4) The aaccess token is used to access the protected resource in the external authorization domain.
+
+Accessing different protected resources may require steps 2) to 4) again with different scope parameters. Accessing a protected resource in an entirely different authorization domain often requires the entire flow to be followed again, to retrieve a new platform-issued credential with an audience for the other authorization server. This, however, differs based on the platform and implementation.
+
+## Credential format
+
+For the scope of this document we focus on JSON Web Token credential formats. Other formats such as X.509 certificates are possible but not as widely seen as JSON Web Tokens.
+
+The claims in the present assertion vary greatly based on use case and actual platform, but a minimum set of claims are seen across all of them. {{RFC7523}} describes them in detail and according to it, all MUST be present.
+
+~~~json
+{
+  "iss": "https://example.org",
+  "sub": "my-workload",
+  "aud": "custom-audience",
+  "exp": 1729248124
+}
+~~~
+
+For the scope of this specification, the claims can be described the following. Everything from {{RFC7523}} applies.
+
+{:vspace}
+iss
+: The issuer of the workload platform. While this can have any format, it is important to highlight that many authorization servers leverage OpenID Connect {{OIDC}} and/or OAuth 2.0 Authorization Server Metadata {{RFC8414}} to retrieve JSON Web Keys {{RFC7517}} for validation purposes.
+
+sub
+: Subject which identifies the workload within the domain/workload platform instance.
+
+audience
+: One or many audiences the platform issued credential is eligable for. This is crucial when presenting the credential as an assertion towards the external authorization server which MUST identify itself as an audience present in the assertion.
 
 # Patterns {#patterns}
 
@@ -188,16 +220,18 @@ To validate service account tokens, Kubernetes offers workloads to:
 | |                          | |                    |   |
 | |   Authorization Server   | | Protected Resource |   |
 | |                          | |                    |   |
-| +------------^-------------+ +----------^---------+   |
-|              |                          |             |
-+--------------+--------------------------+-------------+
-               |                          |
-      3) present assertion            4) access
-               |                          |
-+--------------+--------------------------+-------------+
-|              |             +------------+  Kubernetes |
-|              |             |                  Cluster |
-|    +---------+-------------+----+                     |
+| +------^-------------+-----+ +----------^---------+   |
+|        |             |                  |             |
++--------+-------------+------------------+-------------+
+         |             |                  |
+3) present assertion   |              5) access
+         |             |                  |
+         |       4) access token          |
+         |             |                  |
++--------+-------------+------------------+-------------+
+|        |             |     +------------+  Kubernetes |
+|        |             |     |                  Cluster |
+|    +---+-------------v-----+----+                     |
 |    |                            |                     |
 |    |    Workload                |                     |
 |    |                            |                     |
@@ -223,9 +257,11 @@ The steps shown in {{fig-kubernetes}} are:
 
 * 2) The Kubernetes Control Plane projects the service account token into the workload. This step is also much simplified and technically happens alongside the scheduling with step 1.
 
-* 3) Workloads present the project service account token as a client assertion towards an external authorization server according to {{RFC7523}}. An access token is returned to the workload as a result.
+* 3) Workloads present the project service account token as a client assertion towards an external authorization server according to {{RFC7523}}.
 
-* 4) The access token issued by the external authorization server is used by the workload to access the projected resource.
+* 4) On success, an access token is returned to the workload to access the protected resource.
+
+* 5) The access token is used to access the protected resource in the external authorization domain.
 
 As an example, the following JSON showcases the claims a Kubernetes Service Account token carries.
 
@@ -285,16 +321,16 @@ The following figure illustrates how a workload can use its JWT-SVID to access a
 |   |                       |   |                      |  |
 |   | Authorization Server  |   |  Protected Resource  |  |
 |   |                       |   |                      |  |
-|   +----------^------------+   +--------^-------------+  |
-|              |                         |                |
-+--------------+-------------------------+----------------+
-               |                         |
-      2) present assertion           3) access
-               |                         |
-+--------------+-------------------------+----------------+
-|              |                         |       Workload |
-|  +-----------+-------------------------+----+  Platform |
-|  |                                          |           |
+|   +-----^-----------------+   +--------^-------------+  |
++---------+------------+-----------------+----------------+
+          |            |                 |
+ 2) present assertion  |             4) access
+          |            |                 |
+          |       3) access token        |
+          |            |                 |
++---------+------------+-----------------+----------------+
+|  +------+------------v-----------------+----+  Workload |
+|  |                                          |  Platform |
 |  |                  Workload                |           |
 |  |                                          |           |
 |  +---------------------+--------------------+           |
@@ -312,24 +348,27 @@ The following figure illustrates how a workload can use its JWT-SVID to access a
 
 The steps shown in {{fig-spiffe}} are:
 
-* 1) The workload retrieves JWT-SVID from the SPIFFE Workload API.
+* 1) The workload request a JWT-SVID from the SPIFFE Workload API with an audience that identifies the external authorization server.
 
-* 2) The workload presents the JWT-SVID as a client assertion in the assertion flow based on {{RFC7523}}. An access token is returned to the workload.
+* 2) The workload presents the JWT-SVID as a client assertion in the assertion flow based on {{RFC7523}}.
 
-* 3) The access token returned in the previous step is used by the workload to access a protected resource.
+* 3) On success, an access token is returned to the workload to access the protected resource.
+
+* 4) The access token is used to access the protected resource in the external authorization domain.
 
 The claims of a JWT-SVID for example looks like this.
-
 ~~~json
 {
   "aud": [
-    "my-audience"
+    "external-authorization-server"
   ],
   "exp": 1729087175,
   "iat": 1729086875,
   "sub": "spiffe://example.org/myservice"
 }
 ~~~
+
+TODO: write about "iss" in JWT-SVID.
 
 ## Cloud Providers {#cloudproviders}
 
@@ -342,38 +381,38 @@ Within a cloud provider the issued credential can often directly be used to acce
 Resources outside of the platform, for example resources or workloads in other clouds, generic web servers or on-premise resources, are most of the time, however, protected by different domains and authorization servers and deny the platform issued credential. In this scenario, the pattern of using the platform issued credential as an assertion in the context of {{RFC7521}}, for JWT particularly {{RFC7523}} towards the authorization server that protected the resource to get an access token.
 
 ~~~aasvg
-+---------------------------------------------------+
-|                     External Authorization Domain |
-|                                                   |
-| +----------------------+  +---------------------+ |
-| |                      |  |                     | |
-| | Authorization Server |  | Protected Resource  | |
-| |                      |  |                     | |
-| +-----------^----------+  +----------^----------+ |
-|             |                        |            |
-+-------------+------------------------+------------+
-              |                        |
-              |                        |
-    B1) present assertion          B2) access
-              |                        |
-              |    +-------------------+
-+-------------+----+--------------------------------+
-|             |    |                          Cloud |
-|             |    |                                |
-|   +---------+----+---+  1) get       +----------+ |
-|   |                  |     identity  |          | |
-|   |  Workload        +---------------> Instance | |
-|   |                  |               |          | |
-|   +---------+--------+               | Metadata | |
-|             |                        |          | |
-|         A1) access                   | Service/ | |
-|             |                        | Endpoint | |
-|   +---------v------------+           |          | |
-|   |                      |           +----------+ |
-|   |  Protected Resource  |                        |
-|   |                      |                        |
-|   +----------------------+                        |
-+---------------------------------------------------+
+   +-----------------------------------------------------+
+   |                       External Authorization Domain |
+   |                                                     |
+   | +------------------------+  +---------------------+ |
+   | |                        |  |                     | |
+   | | Authorization Server   |  | Protected Resource  | |
+   | |                        |  |                     | |
+   | +------^------------+----+  +----------^----------+ |
+   |        |            |                  |            |
+   +--------+------------+------------------+------------+
+            |            |                  |
+B1) present as assertion |              B3) access
+            |            |                  |
+            |       B2) access token        |
+            |            |   +--------------+
+   +--------+------------+---+------------------------------+
+   |        |            |   |                        Cloud |
+   |        |            |   |                              |
+   |   +----+------------v---+--+ 1) get       +----------+ |
+   |   |                        |    identity  |          | |
+   |   |        Workload        +--------------> Instance | |
+   |   |                        |              |          | |
+   |   +-----------+------------+              | Metadata | |
+   |               |                           |          | |
+   |           A1) access                      | Service/ | |
+   |               |                           | Endpoint | |
+   |   +-----------v------------+              |          | |
+   |   |                        |              +----------+ |
+   |   |   Protected Resource   |                           |
+   |   |                        |                           |
+   |   +------------------------+                           |
+   +--------------------------------------------------------+
 ~~~
 {: #fig-cloud title="OAuth2 Assertion Flow in a cloud environment"}
 
@@ -387,9 +426,11 @@ In case the workload needs to access a resource within the cloud (protected by t
 
 In case the workload needs to access a resource outside of the cloud (protected by a different authorization server). This can also be the same cloud but different context (tenant, account).
 
-* B1) The workload presents cloud-issued credential as an assertion towards the external authorization server using {{RFC7523}}. An access token is returned to the workload.
+* B1) The workload presents cloud-issued credential as an assertion towards the external authorization server using {{RFC7523}}.
 
-* B2) Using the access token from step B1, the workload is able to access the protected resource in the external authorization domain.
+* B2) On success, an access token is returned to the workload to access the protected resource.
+
+* B3) Using the access token, the workload is able to access the protected resource in the external authorization domain.
 
 ## Continues integration/deployment systems {#cicd}
 
@@ -398,19 +439,22 @@ Continous integration and deployment systems allow their pipelines/workflows to 
 ~~~aasvg
 +----------------------------------------------------------+
 |                            External Authorization Domain |
-|                                                          |
 | +--------------------------+     +---------------------+ |
 | |                          |     |                     | |
 | |   Authorization Server   |     |  Protected Resource | |
 | |                          |     |                     | |
-| +-----------^--------------+     +------------^--------+ |
-|             |                                 |          |
-+-------------+---------------------------------+----------+
-              |                                 |
-     3) present assertion                  4) access
-              |                                 |
-+-------------+---------------------------------+----------+
+| +-------^-------------+----+     +------------^--------+ |
+|         |             |                       |          |
++---------+-------------+-----------------------+----------+
+          |             |                       |
+3) present assertion    |                  4) access
+          |             |                       |
+          |      4) access token                |
+          |             |                       |
++---------+-------------v-----------------------+----------+
+|                                                          |
 |                    Task (Workload)                       |
+|                                                          |
 +--------^---------------------------+---------------------+
          |                           |
    1)schedules                2)retrieve identity
@@ -429,9 +473,11 @@ The steps shown in {{fig-cicd}} are:
 
 * 2) The workload is able to retrieve identity from the CI-CD platform. This can differ based on the platform and potentially is already supplied during scheduling phase in step 1.
 
-* 3) The workload presents the CI-CD issued credential as an assertion towards the authorization server in the external authorization domain based on {{RFC7521}}. In case of JWT also {{RFC7523}}. The authorization server returns an access token to the workload.
+* 3) The workload presents the CI-CD issued credential as an assertion towards the authorization server in the external authorization domain based on {{RFC7521}}. In case of JWT also {{RFC7523}}.
 
-* 4) Using the access token from step 3, the workload is able to access the protected resource in the external authorization domain.
+* 4) On success, an access token is returned to the workload to access the protected resource.
+
+* 5) Using the access token, the workload is able to access the protected resource in the external authorization domain.
 
 Tokens of different providers look different, but all of them contain claims carrying the basic context of the executed tasks such as source code management data (e.g. git branch), initiation and more.
 
