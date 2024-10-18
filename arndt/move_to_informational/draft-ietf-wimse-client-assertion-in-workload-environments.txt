@@ -67,17 +67,20 @@ Table of Contents
 
    1.  Introduction
    2.  Terminology
-   3.  Patterns
-     3.1.  Kubernetes
-     3.2.  Secure Production Identity Framework For Everyone (SPIFFE)
-     3.3.  Cloud Providers
-     3.4.  Continues integration/deployment systems
-   4.  Security Considerations
-   5.  IANA Considerations
-   6.  Acknowledgements
-   7.  References
-     7.1.  Normative References
-     7.2.  Informative References
+   3.  OAuth Assertion in Workload Environments
+     3.1.  Overview
+     3.2.  Credential format
+   4.  Patterns
+     4.1.  Kubernetes
+     4.2.  Secure Production Identity Framework For Everyone (SPIFFE)
+     4.3.  Cloud Providers
+     4.4.  Continues integration/deployment systems
+   5.  Security Considerations
+   6.  IANA Considerations
+   7.  Acknowledgements
+   8.  References
+     8.1.  Normative References
+     8.2.  Informative References
    Authors' Addresses
 
 1.  Introduction
@@ -102,34 +105,48 @@ Table of Contents
    this credential attests the workload and its attributes.  Based on
    [RFC7521] and its JWT profile [RFC7523], this credential can then be
    used as a client assertion towards a different authorization server.
-   Figure 1 illustrates this interaction.
 
-   +----------------------------------------------------------+
-   |                           External Authorization Domain  |
-   |                                                          |
-   | +-------------------------+     +--------------------+   |
-   | |                         |     |                    |   |
-   | |   Authorization Server  |     | Protected Resource |   |
-   | |                         |     |                    |   |
-   | +------------^------------+     +------------^-------+   |
-   |              |                               |           |
-   +--------------+-------------------------------+-----------+
-                  |                               |
-        2) present assertion                 3) access
-                  |                               |
-                  |     +-------------------------+
-                  |     |
-   +--------------+-----+-------------------------------------+
-   |              |     |                  Workload Platform  |
-   |              |     |                                     |
-   |  +-----------+-----+---+           +------------------+  |
-   |  |                     |           | Credential       |  |
-   |  |  Workload           +-----------> issued by        |  |
-   |  |                     |  1) get   | Platform         |  |
-   |  +---------------------+           +------------------+  |
-   |                                                          |
-   |                                                          |
-   +----------------------------------------------------------+
+2.  Terminology
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in BCP
+   14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+   The terms 'workload' and 'container' are used interchangeably.
+
+3.  OAuth Assertion in Workload Environments
+
+3.1.  Overview
+
+   Figure 1 illustrates a generic pattern that applies across all of the
+   patterns described in Section 4:
+
+    +----------------------------------------------------------+
+    |                           External Authorization Domain  |
+    |                                                          |
+    | +-------------------------+     +--------------------+   |
+    | |                         |     |                    |   |
+    | |   Authorization Server  |     | Protected Resource |   |
+    | |                         |     |                    |   |
+    | +-------^---------+-------+     +----------^---------+   |
+    +---------+---------+------------------------+-------------+
+              |         |                        |
+              |   3) access token           4) access
+              |         |                        |
+   2) present assertion |                        |
+              |         |     +------------------+
+              |         |     |
+    +---------+---------+-----+--------------------------------+
+    |         |         |     |             Workload Platform  |
+    |         |         |     |                                |
+    |  +------+---------v-----+---+           +-------------+  |
+    |  |                          |           | Credential  |  |
+    |  |        Workload          +-----------> issued by   |  |
+    |  |                          |  1) get   | Platform    |  |
+    |  +--------------------------+           +-------------+  |
+    +----------------------------------------------------------+
 
       Figure 1: OAuth2 Assertion Flow in generic Workload Environment
 
@@ -143,28 +160,63 @@ Table of Contents
    *  2) present credential as an assertion towards an authorization
       server in an external authorization domain.  This step uses the
       assertion_grant flow defined in [RFC7521] and, in case of JWT
-      format, [RFC7523].  As a result of this flow, an access token is
-      returned to the workload.
+      format, [RFC7523].
 
-   *  3) use access token from the previous step to access a protected
-      resource in the external authorization domain.
+   *  3) On success, an access token is returned to the workload to
+      access the protected resource.
 
-   This specifiation defines this flow in more detail based on common
-   pattern seen in the industry and gives reccomendations.
+   *  4) The aaccess token is used to access the protected resource in
+      the external authorization domain.
 
-2.  Terminology
+   Accessing different protected resources may require steps 2) to 4)
+   again with different scope parameters.  Accessing a protected
+   resource in an entirely different authorization domain often requires
+   the entire flow to be followed again, to retrieve a new platform-
+   issued credential with an audience for the other authorization
+   server.  This, however, differs based on the platform and
+   implementation.
 
-   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
-   "OPTIONAL" in this document are to be interpreted as described in BCP
-   14 [RFC2119] [RFC8174] when, and only when, they appear in all
-   capitals, as shown here.
+3.2.  Credential format
 
-   The terms 'workload' and 'container' are used interchangeably.
+   For the scope of this document we focus on JSON Web Token credential
+   formats.  Other formats such as X.509 certificates are possible but
+   not as widely seen as JSON Web Tokens.
 
-3.  Patterns
+   The claims in the present assertion vary greatly based on use case
+   and actual platform, but a minimum set of claims are seen across all
+   of them.  [RFC7523] describes them in detail and according to it, all
+   MUST be present.
 
-3.1.  Kubernetes
+   {
+     "iss": "https://example.org",
+     "sub": "my-workload",
+     "aud": "custom-audience",
+     "exp": 1729248124
+   }
+
+   For the scope of this specification, the claims can be described the
+   following.  Everything from [RFC7523] applies.
+
+   iss
+      The issuer of the workload platform.  While this can have any
+      format, it is important to highlight that many authorization
+      servers leverage OpenID Connect [OIDC] and/or OAuth 2.0
+      Authorization Server Metadata [RFC8414] to retrieve JSON Web Keys
+      [RFC7517] for validation purposes.
+
+   sub
+      Subject which identifies the workload within the domain/workload
+      platform instance.
+
+   audience
+      One or many audiences the platform issued credential is eligable
+      for.  This is crucial when presenting the credential as an
+      assertion towards the external authorization server which MUST
+      identify itself as an audience present in the assertion.
+
+4.  Patterns
+
+4.1.  Kubernetes
 
    In Kubernetes, the primary concept of machine identity is implemented
    through "service accounts" [KubernetesServiceAccount].  These
@@ -222,16 +274,18 @@ Table of Contents
    | |                          | |                    |   |
    | |   Authorization Server   | | Protected Resource |   |
    | |                          | |                    |   |
-   | +------------^-------------+ +----------^---------+   |
-   |              |                          |             |
-   +--------------+--------------------------+-------------+
-                  |                          |
-         3) present assertion            4) access
-                  |                          |
-   +--------------+--------------------------+-------------+
-   |              |             +------------+  Kubernetes |
-   |              |             |                  Cluster |
-   |    +---------+-------------+----+                     |
+   | +------^-------------+-----+ +----------^---------+   |
+   |        |             |                  |             |
+   +--------+-------------+------------------+-------------+
+            |             |                  |
+   3) present assertion   |              5) access
+            |             |                  |
+            |       4) access token          |
+            |             |                  |
+   +--------+-------------+------------------+-------------+
+   |        |             |     +------------+  Kubernetes |
+   |        |             |     |                  Cluster |
+   |    +---+-------------v-----+----+                     |
    |    |                            |                     |
    |    |    Workload                |                     |
    |    |                            |                     |
@@ -262,11 +316,13 @@ Table of Contents
 
    *  3) Workloads present the project service account token as a client
       assertion towards an external authorization server according to
-      [RFC7523].  An access token is returned to the workload as a
-      result.
+      [RFC7523].
 
-   *  4) The access token issued by the external authorization server is
-      used by the workload to access the projected resource.
+   *  4) On success, an access token is returned to the workload to
+      access the protected resource.
+
+   *  5) The access token is used to access the protected resource in
+      the external authorization domain.
 
    As an example, the following JSON showcases the claims a Kubernetes
    Service Account token carries.
@@ -301,7 +357,7 @@ Table of Contents
 
          Figure 3: Example Kubernetes Service Account Token claims
 
-3.2.  Secure Production Identity Framework For Everyone (SPIFFE)
+4.2.  Secure Production Identity Framework For Everyone (SPIFFE)
 
    Secure Production Identity Framework For Everyone, also known as
    SPIFFE, is a cloud native compute foundation (CNCF) adopted project
@@ -342,16 +398,16 @@ Table of Contents
    |   |                       |   |                      |  |
    |   | Authorization Server  |   |  Protected Resource  |  |
    |   |                       |   |                      |  |
-   |   +----------^------------+   +--------^-------------+  |
-   |              |                         |                |
-   +--------------+-------------------------+----------------+
-                  |                         |
-         2) present assertion           3) access
-                  |                         |
-   +--------------+-------------------------+----------------+
-   |              |                         |       Workload |
-   |  +-----------+-------------------------+----+  Platform |
-   |  |                                          |           |
+   |   +-----^-----------------+   +--------^-------------+  |
+   +---------+------------+-----------------+----------------+
+             |            |                 |
+    2) present assertion  |             4) access
+             |            |                 |
+             |       3) access token        |
+             |            |                 |
+   +---------+------------+-----------------+----------------+
+   |  +------+------------v-----------------+----+  Workload |
+   |  |                                          |  Platform |
    |  |                  Workload                |           |
    |  |                                          |           |
    |  +---------------------+--------------------+           |
@@ -369,27 +425,26 @@ Table of Contents
 
    The steps shown in Figure 4 are:
 
-   *  1) The workload retrieves JWT-SVID from the SPIFFE Workload API.
+   *  1) The workload request a JWT-SVID from the SPIFFE Workload API
+      with an audience that identifies the external authorization
+      server.
 
    *  2) The workload presents the JWT-SVID as a client assertion in the
-      assertion flow based on [RFC7523].  An access token is returned to
-      the workload.
+      assertion flow based on [RFC7523].
 
-   *  3) The access token returned in the previous step is used by the
-      workload to access a protected resource.
+   *  3) On success, an access token is returned to the workload to
+      access the protected resource.
 
-   The claims of a JWT-SVID for example looks like this.
+   *  4) The access token is used to access the protected resource in
+      the external authorization domain.
 
-   {
-     "aud": [
-       "my-audience"
-     ],
-     "exp": 1729087175,
-     "iat": 1729086875,
-     "sub": "spiffe://example.org/myservice"
-   }
+   The claims of a JWT-SVID for example looks like this. ~~~json {
+   "aud": [ "external-authorization-server" ], "exp": 1729087175, "iat":
+   1729086875, "sub": "spiffe://example.org/myservice" } ~~~
 
-3.3.  Cloud Providers
+   TODO: write about "iss" in JWT-SVID.
+
+4.3.  Cloud Providers
 
    Workload in cloud platforms can have any shape or form.
    Historically, virtual machines were the most common, with the
@@ -424,38 +479,38 @@ Table of Contents
    [RFC7523] towards the authorization server that protected the
    resource to get an access token.
 
-   +---------------------------------------------------+
-   |                     External Authorization Domain |
-   |                                                   |
-   | +----------------------+  +---------------------+ |
-   | |                      |  |                     | |
-   | | Authorization Server |  | Protected Resource  | |
-   | |                      |  |                     | |
-   | +-----------^----------+  +----------^----------+ |
-   |             |                        |            |
-   +-------------+------------------------+------------+
-                 |                        |
-                 |                        |
-       B1) present assertion          B2) access
-                 |                        |
-                 |    +-------------------+
-   +-------------+----+--------------------------------+
-   |             |    |                          Cloud |
-   |             |    |                                |
-   |   +---------+----+---+  1) get       +----------+ |
-   |   |                  |     identity  |          | |
-   |   |  Workload        +---------------> Instance | |
-   |   |                  |               |          | |
-   |   +---------+--------+               | Metadata | |
-   |             |                        |          | |
-   |         A1) access                   | Service/ | |
-   |             |                        | Endpoint | |
-   |   +---------v------------+           |          | |
-   |   |                      |           +----------+ |
-   |   |  Protected Resource  |                        |
-   |   |                      |                        |
-   |   +----------------------+                        |
-   +---------------------------------------------------+
+      +-----------------------------------------------------+
+      |                       External Authorization Domain |
+      |                                                     |
+      | +------------------------+  +---------------------+ |
+      | |                        |  |                     | |
+      | | Authorization Server   |  | Protected Resource  | |
+      | |                        |  |                     | |
+      | +------^------------+----+  +----------^----------+ |
+      |        |            |                  |            |
+      +--------+------------+------------------+------------+
+               |            |                  |
+   B1) present as assertion |              B3) access
+               |            |                  |
+               |       B2) access token        |
+               |            |   +--------------+
+      +--------+------------+---+------------------------------+
+      |        |            |   |                        Cloud |
+      |        |            |   |                              |
+      |   +----+------------v---+--+ 1) get       +----------+ |
+      |   |                        |    identity  |          | |
+      |   |        Workload        +--------------> Instance | |
+      |   |                        |              |          | |
+      |   +-----------+------------+              | Metadata | |
+      |               |                           |          | |
+      |           A1) access                      | Service/ | |
+      |               |                           | Endpoint | |
+      |   +-----------v------------+              |          | |
+      |   |                        |              +----------+ |
+      |   |   Protected Resource   |                           |
+      |   |                        |                           |
+      |   +------------------------+                           |
+      +--------------------------------------------------------+
 
            Figure 5: OAuth2 Assertion Flow in a cloud environment
 
@@ -476,14 +531,15 @@ Table of Contents
    the same cloud but different context (tenant, account).
 
    *  B1) The workload presents cloud-issued credential as an assertion
-      towards the external authorization server using [RFC7523].  An
-      access token is returned to the workload.
+      towards the external authorization server using [RFC7523].
 
-   *  B2) Using the access token from step B1, the workload is able to
-      access the protected resource in the external authorization
-      domain.
+   *  B2) On success, an access token is returned to the workload to
+      access the protected resource.
 
-3.4.  Continues integration/deployment systems
+   *  B3) Using the access token, the workload is able to access the
+      protected resource in the external authorization domain.
+
+4.4.  Continues integration/deployment systems
 
    Continous integration and deployment systems allow their pipelines/
    workflows to receive identity every time they run.  Particularly in
@@ -495,19 +551,22 @@ Table of Contents
 
    +----------------------------------------------------------+
    |                            External Authorization Domain |
-   |                                                          |
    | +--------------------------+     +---------------------+ |
    | |                          |     |                     | |
    | |   Authorization Server   |     |  Protected Resource | |
    | |                          |     |                     | |
-   | +-----------^--------------+     +------------^--------+ |
-   |             |                                 |          |
-   +-------------+---------------------------------+----------+
-                 |                                 |
-        3) present assertion                  4) access
-                 |                                 |
-   +-------------+---------------------------------+----------+
+   | +-------^-------------+----+     +------------^--------+ |
+   |         |             |                       |          |
+   +---------+-------------+-----------------------+----------+
+             |             |                       |
+   3) present assertion    |                  4) access
+             |             |                       |
+             |      4) access token                |
+             |             |                       |
+   +---------+-------------v-----------------------+----------+
+   |                                                          |
    |                    Task (Workload)                       |
+   |                                                          |
    +--------^---------------------------+---------------------+
             |                           |
       1)schedules                2)retrieve identity
@@ -534,32 +593,33 @@ Table of Contents
    *  3) The workload presents the CI-CD issued credential as an
       assertion towards the authorization server in the external
       authorization domain based on [RFC7521].  In case of JWT also
-      [RFC7523].  The authorization server returns an access token to
-      the workload.
+      [RFC7523].
 
-   *  4) Using the access token from step 3, the workload is able to
-      access the protected resource in the external authorization
-      domain.
+   *  4) On success, an access token is returned to the workload to
+      access the protected resource.
+
+   *  5) Using the access token, the workload is able to access the
+      protected resource in the external authorization domain.
 
    Tokens of different providers look different, but all of them contain
    claims carrying the basic context of the executed tasks such as
    source code management data (e.g. git branch), initiation and more.
 
-4.  Security Considerations
+5.  Security Considerations
 
    This entire document is about security.
 
-5.  IANA Considerations
+6.  IANA Considerations
 
    This document does not require actions by IANA.
 
-6.  Acknowledgements
+7.  Acknowledgements
 
    Add your name here.
 
-7.  References
+8.  References
 
-7.1.  Normative References
+8.1.  Normative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -597,7 +657,7 @@ Table of Contents
               DOI 10.17487/RFC8414, June 2018,
               <https://www.rfc-editor.org/rfc/rfc8414>.
 
-7.2.  Informative References
+8.2.  Informative References
 
    [KubernetesServiceAccount]
               "Kubernetes Service Account", May 2024,
