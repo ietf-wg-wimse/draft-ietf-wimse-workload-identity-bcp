@@ -5,13 +5,13 @@
 WIMSE                                                         B. Hofmann
 Internet-Draft                                             H. Tschofenig
 Intended status: Informational                                   Siemens
-Expires: 20 April 2025                                       E. Giordano
+Expires: 21 April 2025                                       E. Giordano
                                                                    Nokia
                                                             Y. Rosomakho
                                                                  Zscaler
                                                       A. Schwenkschuster
                                                                Microsoft
-                                                         17 October 2024
+                                                         18 October 2024
 
 
           OAuth 2.0 Client Assertion in Workload Environments
@@ -47,7 +47,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 20 April 2025.
+   This Internet-Draft will expire on 21 April 2025.
 
 Copyright Notice
 
@@ -104,32 +104,32 @@ Table of Contents
    used as a client assertion towards a different authorization server.
    Figure 1 illustrates this interaction.
 
-   ┌──────────────────────────────────────────────────────────┐
-   │                           External Authorization Domain  │
-   │                                                          │
-   │ ┌─────────────────────────┐     ┌────────────────────┐   │
-   │ │                         │     │                    │   │
-   │ │   Authorization Server  │     │  Resource Server   │   │
-   │ │                         │     │                    │   │
-   │ └────────────┬────────────┘     └────────────▲───────┘   │
-   │              │                               │           │
-   └──────────────┼───────────────────────────────┼───────────┘
-                  │                               │
+   +----------------------------------------------------------+
+   |                           External Authorization Domain  |
+   |                                                          |
+   | +-------------------------+     +--------------------+   |
+   | |                         |     |                    |   |
+   | |   Authorization Server  |     | Protected Resource |   |
+   | |                         |     |                    |   |
+   | +------------^------------+     +------------^-------+   |
+   |              |                               |           |
+   +--------------+-------------------------------+-----------+
+                  |                               |
         2) present assertion                 3) access
-                  │                               │
-                  │     ┌─────────────────────────┘
-                  │     │
-   ┌──────────────┼─────┼─────────────────────────────────────┐
-   │              │     │                  Workload Platform  │
-   │              │     │                                     │
-   │  ┌───────────┴─────┴───┐           ┌──────────────────┐  │
-   │  │                     │           │ Credential       │  │
-   │  │  Workload           ├───────────► issued by        │  │
-   │  │                     │  1) get   │ Platform         │  │
-   │  └─────────────────────┘           └──────────────────┘  │
-   │                                                          │
-   │                                                          │
-   └──────────────────────────────────────────────────────────┘
+                  |                               |
+                  |     +-------------------------+
+                  |     |
+   +--------------+-----+-------------------------------------+
+   |              |     |                  Workload Platform  |
+   |              |     |                                     |
+   |  +-----------+-----+---+           +------------------+  |
+   |  |                     |           | Credential       |  |
+   |  |  Workload           +-----------> issued by        |  |
+   |  |                     |  1) get   | Platform         |  |
+   |  +---------------------+           +------------------+  |
+   |                                                          |
+   |                                                          |
+   +----------------------------------------------------------+
 
       Figure 1: OAuth2 Assertion Flow in generic Workload Environment
 
@@ -166,81 +166,88 @@ Table of Contents
 
 3.1.  Kubernetes
 
-   Kubernetes notion of identity is mainly the concept of "service
-   accounts" which are either created explictly or automatically during
-   deployment time.  While the mean purpose of these identities is to
-   authenticate access to the Kubernetes Control Plane it is more and
-   more used to authenticate workloads between each other too.  The
-   credential format used to authenticate service account is JWT that
-   are signed by the Kubernetes Control Plane.
+   In Kubernetes, the primary concept of machine identity is implemented
+   through "service accounts" [KubernetesServiceAccount].  These
+   accounts can be explicitly created or a default one is automatically
+   assigned.  Service accounts utilize JSON Web Tokens (JWTs) [RFC7519]
+   as their credential format, with these tokens being cryptographically
+   signed by the Kubernetes Control Plane.
 
-   To programatically use service account tokens workloads can
+   Service accounts serve multiple authentication purposes within the
+   Kubernetes ecosystem.  They are used to authenticate to Kubernetes
+   APIs, between different workloads and to access external resources
+   (which is particularly relevant to the scope of this document).
 
-   *  use the TokenRequest API of the control plane
+   To programatically use service accounts, workloads can:
+
+   *  use the Token Request API [TokenReviewV1] of the control plane
 
    *  have the token projected into the file system of the workload.
       This is commonly referred to as "projected service accout token".
 
-   Both options allow workloads to
+   Both options allow workloads to:
 
    *  specify a custom audience.  Possible audiences can be restricted
-      based on control plane policy.
+      based on policy.
 
-   *  specify a custom lifetime.  (TODO, is policy possible?)
+   *  specify a custom lifetime.  Maximum lifetime can be restricted by
+      policy.
 
    *  bind the token lifetime to an object lifecycle.  This allows the
       token to be invalidated when the object is deleted.  For example,
       when a Kubernetes Deployment is removed from the server.  It is
       important to highlight, that invalidation is only in effect if the
-      TokenReview API of Kubernetes is used to validate the token.
+      Token Review API [TokenReviewV1] of Kubernetes is used to validate
+      the token.
 
-   To validate service account tokens, Kubernetes offers workloads to
+   To validate service account tokens, Kubernetes offers workloads to:
+
+   *  make us of the Token Review API [TokenReviewV1].  This API
+      introspects the token, makes sure it hasn't been invalidated and
+      returns the claims.
 
    *  mount the public keys used to sign the tokens into the file system
       of the workload.  This allows workloads to decentrally validate
       the tokens signature.
 
-   *  make us of the TokenReview API.  This API introspects the token,
-      makes sure it hasn't been invalidated and returns the claims.
+   *  Optionally, a JSON Web Key Set [RFC7517] is exposed via a
+      webserver.  This allows the Service Account Token to be validated
+      outside of the cluster and without line of sight towards the
+      actual Kubernetes Control Plane API.
 
-   *  Optionally, a JSON Web Key Set is exposed via a webserver.  This
-      allows the Service Account Token to be validated outside of the
-      cluster and without line of sight towards the actual Kubernetes
-      Control Plane API.
-
-   ┌───────────────────────────────────────────────────────┐
-   │                                  Authorization Domain │
-   │                                                       │
-   │ ┌──────────────────────────┐ ┌────────────────────┐   │
-   │ │                          │ │                    │   │
-   │ │   Authorization Server   │ │  Resource Server   │   │
-   │ │                          │ │                    │   │
-   │ └────────────▲─────────────┘ └──────────▲─────────┘   │
-   │              │                          │             │
-   └──────────────┼──────────────────────────┼─────────────┘
-                  │                          │
+   +-------------------------------------------------------+
+   |                         External Authorization Domain |
+   |                                                       |
+   | +--------------------------+ +--------------------+   |
+   | |                          | |                    |   |
+   | |   Authorization Server   | | Protected Resource |   |
+   | |                          | |                    |   |
+   | +------------^-------------+ +----------^---------+   |
+   |              |                          |             |
+   +--------------+--------------------------+-------------+
+                  |                          |
          3) present assertion            4) access
-                  │                          │
-   ┌──────────────┼──────────────────────────┼─────────────┐
-   │              │             ┌────────────┘  Kubernetes │
-   │              │             │                  Cluster │
-   │    ┌─────────┴─────────────┴────┐                     │
-   │    │                            │                     │
-   │    │    Workload                │                     │
-   │    │                            │                     │
-   │    └────▲────────────────▲──────┘                     │
-   │         │                │                            │
-   │         │                │                            │
-   │    1) schedule     2) project service                 │
-   │         │             account token                   │
-   │         │                │                            │
-   │   ┌─────┴────────────────┴───────────────────┐        │
-   │   │                                          │        │
-   │   │        Kubernetes Control Plane          │        │
-   │   │                                          │        │
-   │   └──────────────────────────────────────────┘        │
-   │                                                       │
-   └───────────────────────────────────────────────────────┘
+                  |                          |
+   +--------------+--------------------------+-------------+
+   |              |             +------------+  Kubernetes |
+   |              |             |                  Cluster |
+   |    +---------+-------------+----+                     |
+   |    |                            |                     |
+   |    |    Workload                |                     |
+   |    |                            |                     |
+   |    +----^----------------^------+                     |
+   |         |                |                            |
+   |         |                |                            |
+   |    1) schedule     2) project service                 |
+   |         |             account token                   |
+   |         |                |                            |
+   |   +-----+----------------+-------------------+        |
+   |   |                                          |        |
+   |   |        Kubernetes Control Plane          |        |
+   |   |                                          |        |
+   |   +------------------------------------------+        |
+   |                                                       |
+   +-------------------------------------------------------+
 
     Figure 2: OAuth2 Assertion Flow in a Kubernetes Workload Environment
 
@@ -273,23 +280,23 @@ Table of Contents
      "iss": "https://kubernetes.default.svc",  # matches the first value passed to the --service-account-issuer flag
      "jti": "ea28ed49-2e11-4280-9ec5-bc3d1d84661a",  # ServiceAccountTokenJTI feature must be enabled for the claim to be present
      "kubernetes.io": {
-       "namespace": "kube-system",
+       "namespace": "my-namespace",
        "node": {  # ServiceAccountTokenPodNodeInfo feature must be enabled for the API server to add this node reference claim
          "name": "127.0.0.1",
          "uid": "58456cb0-dd00-45ed-b797-5578fdceaced"
        },
        "pod": {
-         "name": "coredns-69cbfb9798-jv9gn",
+         "name": "my-workload-69cbfb9798-jv9gn",
          "uid": "778a530c-b3f4-47c0-9cd5-ab018fb64f33"
        },
        "serviceaccount": {
-         "name": "coredns",
+         "name": "my-workload",
          "uid": "a087d5a0-e1dd-43ec-93ac-f13d89cd13af"
        },
        "warnafter": 1700081020
      },
      "nbf": 1700077413,
-     "sub": "system:serviceaccount:kube-system:coredns"
+     "sub": "system:serviceaccount:my-namespace:my-workload"
    }
 
          Figure 3: Example Kubernetes Service Account Token claims
@@ -329,27 +336,34 @@ Table of Contents
    The following figure illustrates how a workload can use its JWT-SVID
    to access a protected resource outside of SPIFFE.
 
-   ┌───────────────────────┐   ┌──────────────────────┐
-   │                       │   │                      │
-   │ Authorization Server  │   │  Protected Resource  │
-   │                       │   │                      │
-   └──────────▲────────────┘   └───────────▲──────────┘
-              │                            │
-     2) present assertion              3) access
-              │                            │
-   ┌──────────┴────────────────────────────┴──────────┐
-   │                                                  │
-   │                     Workload                     │
-   │                                                  │
-   └────────────────────────┬─────────────────────────┘
-                            │
-                     1) get JWT-SVID
-                            │
-   ┌────────────────────────▼─────────────────────────┐
-   │                                                  │
-   │                SPIFFE Workload API               │
-   │                                                  │
-   └──────────────────────────────────────────────────┘
+   +---------------------------------------------------------+
+   |                           External Authorization Domain |
+   |   +-----------------------+   +----------------------+  |
+   |   |                       |   |                      |  |
+   |   | Authorization Server  |   |  Protected Resource  |  |
+   |   |                       |   |                      |  |
+   |   +----------^------------+   +--------^-------------+  |
+   |              |                         |                |
+   +--------------+-------------------------+----------------+
+                  |                         |
+         2) present assertion           3) access
+                  |                         |
+   +--------------+-------------------------+----------------+
+   |              |                         |       Workload |
+   |  +-----------+-------------------------+----+  Platform |
+   |  |                                          |           |
+   |  |                  Workload                |           |
+   |  |                                          |           |
+   |  +---------------------+--------------------+           |
+   |                        |                                |
+   |                 1) get JWT-SVID                         |
+   |                        |                                |
+   |  +---------------------v--------------------+           |
+   |  |                                          |           |
+   |  |           SPIFFE Workload API            |           |
+   |  |                                          |           |
+   |  +------------------------------------------+           |
+   +---------------------------------------------------------+
 
           Figure 4: OAuth2 Assertion Flow in a SPIFFE Environment
 
@@ -410,38 +424,38 @@ Table of Contents
    [RFC7523] towards the authorization server that protected the
    resource to get an access token.
 
-   ┌───────────────────────────────────────────────────┐
-   │                     External Authorization Domain │
-   │                                                   │
-   │ ┌──────────────────────┐  ┌─────────────────────┐ │
-   │ │                      │  │                     │ │
-   │ │ Authorization Server │  │ Protected Resource  │ │
-   │ │                      │  │                     │ │
-   │ └───────────▲──────────┘  └──────────▲──────────┘ │
-   │             │                        │            │
-   └─────────────┼────────────────────────┼────────────┘
-                 │                        │
-                 │                        │
+   +---------------------------------------------------+
+   |                     External Authorization Domain |
+   |                                                   |
+   | +----------------------+  +---------------------+ |
+   | |                      |  |                     | |
+   | | Authorization Server |  | Protected Resource  | |
+   | |                      |  |                     | |
+   | +-----------^----------+  +----------^----------+ |
+   |             |                        |            |
+   +-------------+------------------------+------------+
+                 |                        |
+                 |                        |
        B1) present assertion          B2) access
-                 │                        │
-                 │    ┌───────────────────┘
-   ┌─────────────┼────┼────────────────────────────────┐
-   │             │    │                          Cloud │
-   │             │    │                                │
-   │   ┌─────────┴────┴───┐  1) get       ┌──────────┐ │
-   │   │                  │     identity  │          │ │
-   │   │  Workload        ├───────────────► Instance │ │
-   │   │                  │               │          │ │
-   │   └─────────┬────────┘               │ Metadata │ │
-   │             │                        │          │ │
-   │         A1) access                   │ Service/ │ │
-   │             │                        │ Endpoint │ │
-   │   ┌─────────▼────────────┐           │          │ │
-   │   │                      │           └──────────┘ │
-   │   │  Protected Resource  │                        │
-   │   │                      │                        │
-   │   └──────────────────────┘                        │
-   └───────────────────────────────────────────────────┘
+                 |                        |
+                 |    +-------------------+
+   +-------------+----+--------------------------------+
+   |             |    |                          Cloud |
+   |             |    |                                |
+   |   +---------+----+---+  1) get       +----------+ |
+   |   |                  |     identity  |          | |
+   |   |  Workload        +---------------> Instance | |
+   |   |                  |               |          | |
+   |   +---------+--------+               | Metadata | |
+   |             |                        |          | |
+   |         A1) access                   | Service/ | |
+   |             |                        | Endpoint | |
+   |   +---------v------------+           |          | |
+   |   |                      |           +----------+ |
+   |   |  Protected Resource  |                        |
+   |   |                      |                        |
+   |   +----------------------+                        |
+   +---------------------------------------------------+
 
            Figure 5: OAuth2 Assertion Flow in a cloud environment
 
@@ -479,30 +493,30 @@ Table of Contents
    used to federate the pipeline/workflow identity to an identity of the
    other authorization server.
 
-   ┌──────────────────────────────────────────────────────────┐
-   │                            External Authorization Domain │
-   │                                                          │
-   │ ┌──────────────────────────┐     ┌─────────────────────┐ │
-   │ │                          │     │                     │ │
-   │ │   Authorization Server   │     │  Protected Resource │ │
-   │ │                          │     │                     │ │
-   │ └───────────▲──────────────┘     └────────────▲────────┘ │
-   │             │                                 │          │
-   └─────────────┼─────────────────────────────────┼──────────┘
-                 │                                 │
+   +----------------------------------------------------------+
+   |                            External Authorization Domain |
+   |                                                          |
+   | +--------------------------+     +---------------------+ |
+   | |                          |     |                     | |
+   | |   Authorization Server   |     |  Protected Resource | |
+   | |                          |     |                     | |
+   | +-----------^--------------+     +------------^--------+ |
+   |             |                                 |          |
+   +-------------+---------------------------------+----------+
+                 |                                 |
         3) present assertion                  4) access
-                 │                                 │
-   ┌─────────────┴─────────────────────────────────┴──────────┐
-   │                    Task (Workload)                       │
-   └────────▲───────────────────────────┬─────────────────────┘
-            │                           │
-      1) schedules                2) retrieve identity
-            │                           │
-   ┌────────┴───────────────────────────▼─────────────────────┐
-   │                                                          │
-   │       Continuous Integration / Deployment Platform       │
-   │                                                          │
-   └──────────────────────────────────────────────────────────┘
+                 |                                 |
+   +-------------+---------------------------------+----------+
+   |                    Task (Workload)                       |
+   +--------^---------------------------+---------------------+
+            |                           |
+      1)schedules                2)retrieve identity
+            |                           |
+   +--------+---------------------------v---------------------+
+   |                                                          |
+   |       Continuous Integration / Deployment Platform       |
+   |                                                          |
+   +----------------------------------------------------------+
 
    Figure 6: OAuth2 Assertion Flow in a continous integration/deployment
                                 environment
@@ -556,6 +570,14 @@ Table of Contents
               RFC 6749, DOI 10.17487/RFC6749, October 2012,
               <https://www.rfc-editor.org/rfc/rfc6749>.
 
+   [RFC7517]  Jones, M., "JSON Web Key (JWK)", RFC 7517,
+              DOI 10.17487/RFC7517, May 2015,
+              <https://www.rfc-editor.org/rfc/rfc7517>.
+
+   [RFC7519]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token
+              (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015,
+              <https://www.rfc-editor.org/rfc/rfc7519>.
+
    [RFC7521]  Campbell, B., Mortimore, C., Jones, M., and Y. Goland,
               "Assertion Framework for OAuth 2.0 Client Authentication
               and Authorization Grants", RFC 7521, DOI 10.17487/RFC7521,
@@ -577,10 +599,25 @@ Table of Contents
 
 7.2.  Informative References
 
+   [KubernetesServiceAccount]
+              "Kubernetes Service Account", May 2024,
+              <https://kubernetes.io/docs/concepts/security/service-
+              accounts/>.
+
    [OIDC]     Sakimura, N., Bradley, J., Jones, M., de Medeiros, B., and
               C. Mortimore, "OpenID Connect Core 1.0 incorporating
               errata set 1", November 2014,
               <https://openid.net/specs/openid-connect-core-1_0.html>.
+
+   [TokenRequestV1]
+              "Kubernetes Token Request API V1", August 2024,
+              <https://kubernetes.io/docs/reference/kubernetes-api/
+              authentication-resources/token-request-v1/>.
+
+   [TokenReviewV1]
+              "Kubernetes Token Review API V1", August 2024,
+              <https://kubernetes.io/docs/reference/kubernetes-api/
+              authentication-resources/token-review-v1/>.
 
 Authors' Addresses
 
