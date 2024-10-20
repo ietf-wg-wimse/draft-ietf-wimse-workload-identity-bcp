@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-10-17T00:53:29.928924+00:00",
+  "timestamp": "2024-10-20T00:58:16.321363+00:00",
   "repo": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
   "labels": [
     {
@@ -67,7 +67,7 @@
       "comments": [
         {
           "author": "b3n3d17",
-          "authorAssociation": "NONE",
+          "authorAssociation": "COLLABORATOR",
           "body": "I believe the last 2 fit best:\r\n\"Best Current Practice for Workload Identity in Container Orchestration\"\r\n\"Best Current Practice for Workload Identity Using OAuth 2.0 and JWT\"\r\n\r\nor:\r\n\r\n\"Best Current Practice for OAuth 2.0 Client Authentication in [k8s|Container Orchestration] utilising JWT\"\r\n",
           "createdAt": "2024-06-27T13:38:33Z",
           "updatedAt": "2024-06-27T13:38:33Z"
@@ -190,7 +190,7 @@
       "url": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp/pull/4",
       "state": "MERGED",
       "author": "arndt-s",
-      "authorAssociation": "CONTRIBUTOR",
+      "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Taking our last conversation into account I wanted to contribute my take on the problem and wrote the introduction the way I see it.  \r\n\r\nThis is not a version that can be merged, but the best way to show it in a diff and allow comments. Let me know what you think.",
@@ -216,7 +216,7 @@
             "abbreviatedOid": "007da58"
           },
           "author": "b3n3d17",
-          "authorAssociation": "NONE",
+          "authorAssociation": "COLLABORATOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2024-06-21T07:53:56Z",
@@ -236,7 +236,7 @@
             "abbreviatedOid": "007da58"
           },
           "author": "b3n3d17",
-          "authorAssociation": "NONE",
+          "authorAssociation": "COLLABORATOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2024-06-21T07:59:20Z",
@@ -256,7 +256,7 @@
             "abbreviatedOid": "4f88d6a"
           },
           "author": "arndt-s",
-          "authorAssociation": "CONTRIBUTOR",
+          "authorAssociation": "COLLABORATOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2024-06-21T11:16:42Z",
@@ -285,7 +285,7 @@
       "url": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp/pull/5",
       "state": "MERGED",
       "author": "arndt-s",
-      "authorAssociation": "CONTRIBUTOR",
+      "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "",
@@ -305,6 +305,197 @@
       },
       "comments": [],
       "reviews": []
+    },
+    {
+      "number": 8,
+      "id": "PR_kwDOL34A-M5-_YSo",
+      "title": "Move to informational & add other workload environments",
+      "url": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp/pull/8",
+      "state": "OPEN",
+      "author": "arndt-s",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2024-10-17T15:59:25Z",
+      "updatedAt": "2024-10-18T14:30:03Z",
+      "baseRepository": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
+      "baseRefName": "main",
+      "baseRefOid": "ef4a18f9bfa6828f31c75385fe968ead032b4634",
+      "headRepository": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
+      "headRefName": "arndt/move_to_informational",
+      "headRefOid": "f2a01f105f01d89bdd10bffe64bc679616ee914c",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL34A-M6NmxkE",
+          "commit": {
+            "abbreviatedOid": "4034935"
+          },
+          "author": "b3n3d17",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-17T16:37:13Z",
+          "updatedAt": "2024-10-17T16:37:14Z",
+          "comments": [
+            {
+              "originalPosition": 114,
+              "body": "I Like the new diagram, Its much more agnostic and to k8s, but still shows the approach clearly.",
+              "createdAt": "2024-10-17T16:37:13Z",
+              "updatedAt": "2024-10-17T16:37:14Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL34A-M6Nmy7E",
+          "commit": {
+            "abbreviatedOid": "4034935"
+          },
+          "author": "b3n3d17",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-17T16:40:14Z",
+          "updatedAt": "2024-10-17T16:40:14Z",
+          "comments": [
+            {
+              "originalPosition": 146,
+              "body": ">it is more and more used to authenticate workloads between each other too\r\n\r\n**and authenticate agains other domains such as cloud accounts.**\r\n",
+              "createdAt": "2024-10-17T16:40:14Z",
+              "updatedAt": "2024-10-17T16:40:14Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL34A-M6Nmzj-",
+          "commit": {
+            "abbreviatedOid": "4034935"
+          },
+          "author": "b3n3d17",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-17T16:41:34Z",
+          "updatedAt": "2024-10-17T16:41:34Z",
+          "comments": [
+            {
+              "originalPosition": 169,
+              "body": "https://kubernetes.io/docs/concepts/storage/projected-volumes/#serviceaccounttoken\r\nYes - one can specify a custom lifetime when projecting the service account token into a pod's filesystem.",
+              "createdAt": "2024-10-17T16:41:34Z",
+              "updatedAt": "2024-10-17T16:41:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL34A-M6Nm71w",
+          "commit": {
+            "abbreviatedOid": "4034935"
+          },
+          "author": "jricher",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "Formatting comment - if possible, use AASVG tags to render diagrams as vectors in the HTML version.",
+          "createdAt": "2024-10-17T16:59:21Z",
+          "updatedAt": "2024-10-17T17:00:37Z",
+          "comments": [
+            {
+              "originalPosition": 88,
+              "body": "```suggestion\r\n~~~ aasvg\r\n```",
+              "createdAt": "2024-10-17T16:59:21Z",
+              "updatedAt": "2024-10-17T17:00:37Z"
+            },
+            {
+              "originalPosition": 166,
+              "body": "```suggestion\r\n~~~ aasvg\r\n```",
+              "createdAt": "2024-10-17T16:59:34Z",
+              "updatedAt": "2024-10-17T17:00:37Z"
+            },
+            {
+              "originalPosition": 264,
+              "body": "```suggestion\r\n~~~ aasvg\r\n```",
+              "createdAt": "2024-10-17T16:59:45Z",
+              "updatedAt": "2024-10-17T17:00:37Z"
+            },
+            {
+              "originalPosition": 320,
+              "body": "```suggestion\r\n~~~ aasvg\r\n```",
+              "createdAt": "2024-10-17T16:59:53Z",
+              "updatedAt": "2024-10-17T17:00:37Z"
+            },
+            {
+              "originalPosition": 374,
+              "body": "```suggestion\r\n~~~ aasvg\r\n```",
+              "createdAt": "2024-10-17T17:00:00Z",
+              "updatedAt": "2024-10-17T17:00:37Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL34A-M6NtYZv",
+          "commit": {
+            "abbreviatedOid": "4034935"
+          },
+          "author": "arndt-s",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-18T09:03:21Z",
+          "updatedAt": "2024-10-18T09:03:22Z",
+          "comments": [
+            {
+              "originalPosition": 169,
+              "body": "Thank you!",
+              "createdAt": "2024-10-18T09:03:22Z",
+              "updatedAt": "2024-10-18T09:03:22Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL34A-M6NtcXh",
+          "commit": {
+            "abbreviatedOid": "4034935"
+          },
+          "author": "arndt-s",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-18T09:09:40Z",
+          "updatedAt": "2024-10-18T09:09:40Z",
+          "comments": [
+            {
+              "originalPosition": 146,
+              "body": "I rewrote the section a bit, Kubernetes mentions the service account use cases here https://kubernetes.io/docs/concepts/security/service-accounts/#use-cases.\r\n\r\nBefore, I wrote that primary use case is to authenticate to Kubernetes APIs, but I guess that's quite an old statement.\r\n\r\nAlso added references to Kubernetes docs.",
+              "createdAt": "2024-10-18T09:09:40Z",
+              "updatedAt": "2024-10-18T09:10:05Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL34A-M6NtdFx",
+          "commit": {
+            "abbreviatedOid": "4034935"
+          },
+          "author": "arndt-s",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-18T09:11:04Z",
+          "updatedAt": "2024-10-18T09:11:04Z",
+          "comments": [
+            {
+              "originalPosition": 88,
+              "body": "Awesome, I feel like a Picasso now \ud83d\ude80 \ud83d\ude04 ",
+              "createdAt": "2024-10-18T09:11:04Z",
+              "updatedAt": "2024-10-18T09:11:04Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
