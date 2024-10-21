@@ -87,7 +87,7 @@ informative:
 
 The use of the OAuth 2.0 framework for container orchestration systems poses a challenge as managing secrets, such as client_id and client_secret, can be complex and error-prone. Instead of manual provisioning these credentials the industry has moved to a federation-based approach where credentials of the underlying workload platform are used as assertions towards an OAuth authorization server leveraging the Client Assertion Flow {{RFC7521}}, in particular {{RFC7523}}.
 
-This specifications describes a meta flow in {{overview}}, gives security reccomendations in {{reccomendations}} and outlines concrete patterns in {{patterns}}.
+This specifications describes a meta flow in {{overview}}, gives security recommendations in {{recommendations}} and outlines concrete patterns in {{patterns}}.
 
 --- middle
 
@@ -147,7 +147,7 @@ Even though, technically, the platform credential is also issued by an authoriza
 
 The figure outlines the following steps which are applicable in any pattern.
 
-* 1) retrieve credential issued by platform. The way this is acchieved and whether this is workload or platform initiated differs based on the platform.
+* 1) retrieve credential issued by platform. The way this is achieved and whether this is workload or platform initiated differs based on the platform.
 
 * 2) present credential as an assertion towards an authorization server in an external authorization domain. This step uses the assertion_grant flow defined in {{RFC7521}} and, in case of JWT format, {{RFC7523}}.
 
@@ -182,9 +182,9 @@ sub
 : Subject which identifies the workload within the domain/workload platform instance.
 
 audience
-: One or many audiences the platform issued credential is eligable for. This is crucial when presenting the credential as an assertion towards the external authorization server which MUST identify itself as an audience present in the assertion.
+: One or many audiences the platform issued credential is eligible for. This is crucial when presenting the credential as an assertion towards the external authorization server which MUST identify itself as an audience present in the assertion.
 
-# Security Reccomendations {#reccomendations}
+# Security Recommendations {#recommendations}
 
 All security considerations in section 8 of {{RFC7521}} apply.
 
@@ -213,7 +213,7 @@ Authorization servers that validate assertions SHOULD make use of these claims. 
 
 Tokens SHOULD NOT exceed the lifetime of the workloads they represent. For example, a workload that has an expected lifetime of an hour should not receive a token valid for 2 hours or more.
 
-For the scope of this specification, where a platform issued credential is used to authenticate to retrieve an access token for an external authorization domain, a short-lived credential is reccomended.
+For the scope of this specification, where a platform issued credential is used to authenticate to retrieve an access token for an external authorization domain, a short-lived credential is recommended.
 
 ## Workload lifecycle and invalidation
 
@@ -349,7 +349,7 @@ As an example, the following JSON showcases the claims a Kubernetes Service Acco
 
 ## Secure Production Identity Framework For Everyone (SPIFFE) {#spiffe}
 
-Secure Production Identity Framework For Everyone, also known as SPIFFE, is a cloud native compute foundation (CNCF) adopted project which defines an API definitioned called "Workload API" to delivery machine identity to workloads. Workloads can retrieve either X509 based or JWT credentials without the need to authenticate making it very easy to use. How workloads authenticate on the API is not part of the specification. It is common to use platform metadata from the operating system and the workload platform for authentication on the Workload API.
+Secure Production Identity Framework For Everyone, also known as SPIFFE, is a cloud native compute foundation (CNCF) adopted project which defines an API defined called "Workload API" to delivery machine identity to workloads. Workloads can retrieve either X509 based or JWT credentials without the need to authenticate making it very easy to use. How workloads authenticate on the API is not part of the specification. It is common to use platform metadata from the operating system and the workload platform for authentication on the Workload API.
 
 For the scope of this document, the JWT formatted credential is the most relevant one. SPIFFE referres to it as "JWT-SVID" (JWT - Single Verifyable Identity Document).
 
@@ -427,7 +427,7 @@ Workload in cloud platforms can have any shape or form. Historically, virtual ma
 
 To create a common identity interface across cloud services and offerings, the pattern of an `Instance Metadata Endpoint` has been established by the biggest cloud providers. Next to the option for workloads to get metadata about themselves, it also allows them to receive identity. The credential types offered can vary. JWT, however, is the one that is common across all of them. The issued credential allows proof to anyone it is being presented to, that the workload platform has attested the workload and it can be considered authenticated.
 
-Within a cloud provider the issued credential can often directly be used to access resources of any kind across the platform making integration between the services easy and `credential less`. While the term is technically missleading, from a user perspective, no credential needs to be issued, provisioned, rotated or revoked, as everything is handled internally by the platform.
+Within a cloud provider the issued credential can often directly be used to access resources of any kind across the platform making integration between the services easy and `credential less`. While the term is technically misleading, from a user perspective, no credential needs to be issued, provisioned, rotated or revoked, as everything is handled internally by the platform.
 
 Resources outside of the platform, for example resources or workloads in other clouds, generic web servers or on-premise resources, are most of the time, however, protected by different domains and authorization servers and deny the platform issued credential. In this scenario, the pattern of using the platform issued credential as an assertion in the context of {{RFC7521}}, for JWT particularly {{RFC7523}} towards the authorization server that protected the resource to get an access token.
 
@@ -483,9 +483,9 @@ In case the workload needs to access a resource outside of the cloud (protected 
 
 * B3) Using the access token, the workload is able to access the protected resource in the external authorization domain.
 
-## Continues integration/deployment systems {#cicd}
+## Continuoues integration/deployment systems {#cicd}
 
-Continous integration and deployment systems allow their pipelines/workflows to receive identity every time they run. Particularly in situations where build outputs need to be uploaded to resources protected by other authorization server, deployments need to be made, or more generally, protected resources to be accessed, {{RFC7523}} is used to federate the pipeline/workflow identity to an identity of the other authorization server.
+Continuous integration and deployment systems allow their pipelines/workflows to receive identity every time they run. Particularly in situations where build outputs need to be uploaded to resources protected by other authorization server, deployments need to be made, or more generally, protected resources to be accessed, {{RFC7523}} is used to federate the pipeline/workflow identity to an identity of the other authorization server.
 
 ~~~aasvg
 +----------------------------------------------------------+
@@ -516,7 +516,7 @@ Continous integration and deployment systems allow their pipelines/workflows to 
 |                                                          |
 +----------------------------------------------------------+
 ~~~
-{: #fig-cicd title="OAuth2 Assertion Flow in a continous integration/deployment environment"}
+{: #fig-cicd title="OAuth2 Assertion Flow in a continuous integration/deployment environment"}
 
 The steps shown in {{fig-cicd}} are:
 
@@ -542,4 +542,4 @@ In this case, technically, the protected resource and workload are part of the s
 
 ## Custom assertion flows
 
-While {{RFC7521}} and {{RFC7523}} are the proposed standards for this pattern, some authorization servers use {{RFC8693}} or a custom API for the issuance of an access token based on an existing platform identity credentials. These pattern are not reccommended and prevent interoperability.
+While {{RFC7521}} and {{RFC7523}} are the proposed standards for this pattern, some authorization servers use {{RFC8693}} or a custom API for the issuance of an access token based on an existing platform identity credentials. These pattern are not recommended and prevent interoperability.
