@@ -153,7 +153,7 @@ The figure outlines the following steps which are applicable in any pattern.
 
 * 3) On success, an access token is returned to the workload to access the protected resource.
 
-* 4) The aaccess token is used to access the protected resource in the external authorization domain.
+* 4) The access token is used to access the protected resource in the external authorization domain.
 
 Accessing different protected resources may require steps 2) to 4) again with different scope parameters. Accessing a protected resource in an entirely different authorization domain often requires the entire flow to be followed again, to retrieve a new platform-issued credential with an audience for the external authorization server. This, however, differs based on the platform and implementation.
 
