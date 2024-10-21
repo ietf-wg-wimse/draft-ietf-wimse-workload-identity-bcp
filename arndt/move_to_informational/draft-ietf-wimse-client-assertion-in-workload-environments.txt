@@ -5,13 +5,13 @@
 WIMSE                                                         B. Hofmann
 Internet-Draft                                             H. Tschofenig
 Intended status: Informational                                   Siemens
-Expires: 21 April 2025                                       E. Giordano
+Expires: 24 April 2025                                       E. Giordano
                                                                    Nokia
                                                             Y. Rosomakho
                                                                  Zscaler
                                                       A. Schwenkschuster
-                                                               Microsoft
-                                                         18 October 2024
+                                                                   SPIRL
+                                                         21 October 2024
 
 
           OAuth 2.0 Client Assertion in Workload Environments
@@ -28,9 +28,9 @@ Abstract
    authorization server leveraging the Client Assertion Flow [RFC7521],
    in particular [RFC7523].
 
-   This approach is seen in the industry across many workload
-   environments, this document outlines common patterns and their use
-   cases.
+   This specifications describes a meta flow in Section 3.1, gives
+   security recommendations in Section 4 and outlines concrete patterns
+   in Appendix A.
 
 Status of This Memo
 
@@ -47,7 +47,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 21 April 2025.
+   This Internet-Draft will expire on 24 April 2025.
 
 Copyright Notice
 
@@ -70,17 +70,26 @@ Table of Contents
    3.  OAuth Assertion in Workload Environments
      3.1.  Overview
      3.2.  Credential format
-   4.  Patterns
-     4.1.  Kubernetes
-     4.2.  Secure Production Identity Framework For Everyone (SPIFFE)
-     4.3.  Cloud Providers
-     4.4.  Continues integration/deployment systems
-   5.  Security Considerations
-   6.  IANA Considerations
-   7.  Acknowledgements
-   8.  References
-     8.1.  Normative References
-     8.2.  Informative References
+   4.  Security Recommendations
+     4.1.  Issuer, subject and audience validation
+     4.2.  Token type validation
+     4.3.  Custom claims are important for context
+     4.4.  Token lifetime
+     4.5.  Workload lifecycle and invalidation
+     4.6.  Proof of possession
+   5.  IANA Considerations
+   6.  Acknowledgements
+   7.  References
+     7.1.  Normative References
+     7.2.  Informative References
+   Appendix A.  Patterns
+     A.1.  Kubernetes
+     A.2.  Secure Production Identity Framework For Everyone (SPIFFE)
+     A.3.  Cloud Providers
+     A.4.  Continuoues integration/deployment systems
+   Appendix B.  Variations
+     B.1.  Direct access to protected resources
+     B.2.  Custom assertion flows
    Authors' Addresses
 
 1.  Introduction
@@ -91,18 +100,18 @@ Table of Contents
    and can only be accessed with an access token.  The challenge for
    workloads is to get this access token issued.
 
-   Traditionally, workloads can be provisioned with client secrets
-   credentials and use the client_credential flow to retrieve an access
-   token.  This model comes with a set of challenges that make it
-   insecure and high-maintaince.  Client secrets need to be manually
-   provisioned and rotated.  They can be stolen and used by attackers to
-   impersonate the workload.
+   Traditionally, workloads were provisioned with client credentials and
+   use the corresponding client credential flow (Section 1.3.4
+   [RFC6749]) to retrieve an access token.  This model comes with a set
+   of challenges that make it insecure and high-maintaince.  Secret
+   material needs to be provisioned and rotated, often manually.  It
+   also can be stolen and used by attackers to impersonate the workload.
 
    A solution to this problem is to not provision secret material to the
-   workload itself but use the workload platform to attest for that
-   workload.  Many workload platforms offer a credential, in most cases
-   a JWT token.  Signed by a platform-internal authorization server,
-   this credential attests the workload and its attributes.  Based on
+   workload and use the platform the workload runs on to attest for it.
+   Many workload platforms offer a credential, in most cases a JWT
+   token.  Signed by a platform-internal authorization server, the
+   credential attests the workload and its attributes.  Based on
    [RFC7521] and its JWT profile [RFC7523], this credential can then be
    used as a client assertion towards a different authorization server.
 
@@ -114,14 +123,21 @@ Table of Contents
    14 [RFC2119] [RFC8174] when, and only when, they appear in all
    capitals, as shown here.
 
-   The terms 'workload' and 'container' are used interchangeably.
+   For the scope of this specification, the term authorization server is
+   only used for the authorization server of the external authorization
+   domain as highlighted in Figure 1.
+
+   Even though, technically, the platform credential is also issued by
+   an authorization server within the workload platform, this
+   specification only refers to it as "platform issuer" or just
+   "platform".
 
 3.  OAuth Assertion in Workload Environments
 
 3.1.  Overview
 
    Figure 1 illustrates a generic pattern that applies across all of the
-   patterns described in Section 4:
+   patterns described in Appendix A:
 
     +----------------------------------------------------------+
     |                           External Authorization Domain  |
@@ -154,7 +170,7 @@ Table of Contents
    pattern.
 
    *  1) retrieve credential issued by platform.  The way this is
-      acchieved and whether this is workload or platform initiated
+      achieved and whether this is workload or platform initiated
       differs based on the platform.
 
    *  2) present credential as an assertion towards an authorization
@@ -165,14 +181,14 @@ Table of Contents
    *  3) On success, an access token is returned to the workload to
       access the protected resource.
 
-   *  4) The aaccess token is used to access the protected resource in
+   *  4) The access token is used to access the protected resource in
       the external authorization domain.
 
    Accessing different protected resources may require steps 2) to 4)
    again with different scope parameters.  Accessing a protected
    resource in an entirely different authorization domain often requires
    the entire flow to be followed again, to retrieve a new platform-
-   issued credential with an audience for the other authorization
+   issued credential with an audience for the external authorization
    server.  This, however, differs based on the platform and
    implementation.
 
@@ -209,14 +225,154 @@ Table of Contents
       platform instance.
 
    audience
-      One or many audiences the platform issued credential is eligable
+      One or many audiences the platform issued credential is eligible
       for.  This is crucial when presenting the credential as an
       assertion towards the external authorization server which MUST
       identify itself as an audience present in the assertion.
 
-4.  Patterns
+4.  Security Recommendations
 
-4.1.  Kubernetes
+   All security considerations in section 8 of [RFC7521] apply.
+
+4.1.  Issuer, subject and audience validation
+
+   Any authorization server that validate and accept platform issued
+   credentials MUST maintain take the following claims into account
+   before accepting assertions:
+
+   *  Issuer
+
+   *  Subject
+
+   *  Audience
+
+   *  Expiration
+
+   Failure to verify any of these properties can result in impersonation
+   or accepting an assertion that was issued for a different purpose.
+
+4.2.  Token type validation
+
+   Authorization servers MUST validate the token type of the assertion.
+   For example, OAuth Refresh or ID tokens MUST NOT be accepted.
+
+4.3.  Custom claims are important for context
+
+   Some platform issued credentials have custom claims that are vital
+   for context and are required to be validated.  For example in a
+   continuous integration and deployment platform where a workload is
+   scheduled for a GIT repository, the branch is crucial.  A 'main'
+   branch may be protected and considered trusted to federate to
+   external authorization servers, other branches may not be and are not
+   allowed to access protected resources.
+
+   Authorization servers that validate assertions SHOULD make use of
+   these claims.  Platform issuers SHOULD allow differentiation based on
+   the subject claim alone.
+
+4.4.  Token lifetime
+
+   Tokens SHOULD NOT exceed the lifetime of the workloads they
+   represent.  For example, a workload that has an expected lifetime of
+   an hour should not receive a token valid for 2 hours or more.
+
+   For the scope of this specification, where a platform issued
+   credential is used to authenticate to retrieve an access token for an
+   external authorization domain, a short-lived credential is
+   recommended.
+
+4.5.  Workload lifecycle and invalidation
+
+   Platform issuers SHOULD invalidate those when the workload stops,
+   pauses or ceases to exist.  How these credentials are invalidated is
+   not in scope of this specification.
+
+4.6.  Proof of possession
+
+   Credentials SHOULD be bound to workloads and proof of possession
+   SHOULD be performed when these credentials are used.  This mitigates
+   token theft.  This proof of possession applies to the platform
+   credential and the access token of the external authorization
+   domains.
+
+5.  IANA Considerations
+
+   This document does not require actions by IANA.
+
+6.  Acknowledgements
+
+   Add your name here.
+
+7.  References
+
+7.1.  Normative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/rfc/rfc2119>.
+
+   [RFC6749]  Hardt, D., Ed., "The OAuth 2.0 Authorization Framework",
+              RFC 6749, DOI 10.17487/RFC6749, October 2012,
+              <https://www.rfc-editor.org/rfc/rfc6749>.
+
+   [RFC7517]  Jones, M., "JSON Web Key (JWK)", RFC 7517,
+              DOI 10.17487/RFC7517, May 2015,
+              <https://www.rfc-editor.org/rfc/rfc7517>.
+
+   [RFC7519]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token
+              (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015,
+              <https://www.rfc-editor.org/rfc/rfc7519>.
+
+   [RFC7521]  Campbell, B., Mortimore, C., Jones, M., and Y. Goland,
+              "Assertion Framework for OAuth 2.0 Client Authentication
+              and Authorization Grants", RFC 7521, DOI 10.17487/RFC7521,
+              May 2015, <https://www.rfc-editor.org/rfc/rfc7521>.
+
+   [RFC7523]  Jones, M., Campbell, B., and C. Mortimore, "JSON Web Token
+              (JWT) Profile for OAuth 2.0 Client Authentication and
+              Authorization Grants", RFC 7523, DOI 10.17487/RFC7523, May
+              2015, <https://www.rfc-editor.org/rfc/rfc7523>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
+
+   [RFC8414]  Jones, M., Sakimura, N., and J. Bradley, "OAuth 2.0
+              Authorization Server Metadata", RFC 8414,
+              DOI 10.17487/RFC8414, June 2018,
+              <https://www.rfc-editor.org/rfc/rfc8414>.
+
+   [RFC8693]  Jones, M., Nadalin, A., Campbell, B., Ed., Bradley, J.,
+              and C. Mortimore, "OAuth 2.0 Token Exchange", RFC 8693,
+              DOI 10.17487/RFC8693, January 2020,
+              <https://www.rfc-editor.org/rfc/rfc8693>.
+
+7.2.  Informative References
+
+   [KubernetesServiceAccount]
+              "Kubernetes Service Account", May 2024,
+              <https://kubernetes.io/docs/concepts/security/service-
+              accounts/>.
+
+   [OIDC]     Sakimura, N., Bradley, J., Jones, M., de Medeiros, B., and
+              C. Mortimore, "OpenID Connect Core 1.0 incorporating
+              errata set 1", November 2014,
+              <https://openid.net/specs/openid-connect-core-1_0.html>.
+
+   [TokenRequestV1]
+              "Kubernetes Token Request API V1", August 2024,
+              <https://kubernetes.io/docs/reference/kubernetes-api/
+              authentication-resources/token-request-v1/>.
+
+   [TokenReviewV1]
+              "Kubernetes Token Review API V1", August 2024,
+              <https://kubernetes.io/docs/reference/kubernetes-api/
+              authentication-resources/token-review-v1/>.
+
+Appendix A.  Patterns
+
+A.1.  Kubernetes
 
    In Kubernetes, the primary concept of machine identity is implemented
    through "service accounts" [KubernetesServiceAccount].  These
@@ -357,11 +513,11 @@ Table of Contents
 
          Figure 3: Example Kubernetes Service Account Token claims
 
-4.2.  Secure Production Identity Framework For Everyone (SPIFFE)
+A.2.  Secure Production Identity Framework For Everyone (SPIFFE)
 
    Secure Production Identity Framework For Everyone, also known as
    SPIFFE, is a cloud native compute foundation (CNCF) adopted project
-   which defines an API definitioned called "Workload API" to delivery
+   which defines an API defined called "Workload API" to delivery
    machine identity to workloads.  Workloads can retrieve either X509
    based or JWT credentials without the need to authenticate making it
    very easy to use.  How workloads authenticate on the API is not part
@@ -444,7 +600,7 @@ Table of Contents
 
    TODO: write about "iss" in JWT-SVID.
 
-4.3.  Cloud Providers
+A.3.  Cloud Providers
 
    Workload in cloud platforms can have any shape or form.
    Historically, virtual machines were the most common, with the
@@ -466,7 +622,7 @@ Table of Contents
    Within a cloud provider the issued credential can often directly be
    used to access resources of any kind across the platform making
    integration between the services easy and credential less.  While the
-   term is technically missleading, from a user perspective, no
+   term is technically misleading, from a user perspective, no
    credential needs to be issued, provisioned, rotated or revoked, as
    everything is handled internally by the platform.
 
@@ -539,9 +695,9 @@ Table of Contents
    *  B3) Using the access token, the workload is able to access the
       protected resource in the external authorization domain.
 
-4.4.  Continues integration/deployment systems
+A.4.  Continuoues integration/deployment systems
 
-   Continous integration and deployment systems allow their pipelines/
+   Continuous integration and deployment systems allow their pipelines/
    workflows to receive identity every time they run.  Particularly in
    situations where build outputs need to be uploaded to resources
    protected by other authorization server, deployments need to be made,
@@ -577,8 +733,8 @@ Table of Contents
    |                                                          |
    +----------------------------------------------------------+
 
-   Figure 6: OAuth2 Assertion Flow in a continous integration/deployment
-                                environment
+        Figure 6: OAuth2 Assertion Flow in a continuous integration/
+                           deployment environment
 
    The steps shown in Figure 6 are:
 
@@ -605,79 +761,27 @@ Table of Contents
    claims carrying the basic context of the executed tasks such as
    source code management data (e.g. git branch), initiation and more.
 
-5.  Security Considerations
+Appendix B.  Variations
 
-   This entire document is about security.
+B.1.  Direct access to protected resources
 
-6.  IANA Considerations
+   Resource servers that protect resources may choose to trust multiple
+   authorization servers, including the one that issues the platform
+   identities.  Instead of using the platform issued identity to receive
+   an access token of a different authorization domain, workloads can
+   directly use the platform issued identity to access a protected
+   resource.
 
-   This document does not require actions by IANA.
+   In this case, technically, the protected resource and workload are
+   part of the same authorization domain.
 
-7.  Acknowledgements
+B.2.  Custom assertion flows
 
-   Add your name here.
-
-8.  References
-
-8.1.  Normative References
-
-   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
-              Requirement Levels", BCP 14, RFC 2119,
-              DOI 10.17487/RFC2119, March 1997,
-              <https://www.rfc-editor.org/rfc/rfc2119>.
-
-   [RFC6749]  Hardt, D., Ed., "The OAuth 2.0 Authorization Framework",
-              RFC 6749, DOI 10.17487/RFC6749, October 2012,
-              <https://www.rfc-editor.org/rfc/rfc6749>.
-
-   [RFC7517]  Jones, M., "JSON Web Key (JWK)", RFC 7517,
-              DOI 10.17487/RFC7517, May 2015,
-              <https://www.rfc-editor.org/rfc/rfc7517>.
-
-   [RFC7519]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token
-              (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015,
-              <https://www.rfc-editor.org/rfc/rfc7519>.
-
-   [RFC7521]  Campbell, B., Mortimore, C., Jones, M., and Y. Goland,
-              "Assertion Framework for OAuth 2.0 Client Authentication
-              and Authorization Grants", RFC 7521, DOI 10.17487/RFC7521,
-              May 2015, <https://www.rfc-editor.org/rfc/rfc7521>.
-
-   [RFC7523]  Jones, M., Campbell, B., and C. Mortimore, "JSON Web Token
-              (JWT) Profile for OAuth 2.0 Client Authentication and
-              Authorization Grants", RFC 7523, DOI 10.17487/RFC7523, May
-              2015, <https://www.rfc-editor.org/rfc/rfc7523>.
-
-   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
-              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
-              May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
-
-   [RFC8414]  Jones, M., Sakimura, N., and J. Bradley, "OAuth 2.0
-              Authorization Server Metadata", RFC 8414,
-              DOI 10.17487/RFC8414, June 2018,
-              <https://www.rfc-editor.org/rfc/rfc8414>.
-
-8.2.  Informative References
-
-   [KubernetesServiceAccount]
-              "Kubernetes Service Account", May 2024,
-              <https://kubernetes.io/docs/concepts/security/service-
-              accounts/>.
-
-   [OIDC]     Sakimura, N., Bradley, J., Jones, M., de Medeiros, B., and
-              C. Mortimore, "OpenID Connect Core 1.0 incorporating
-              errata set 1", November 2014,
-              <https://openid.net/specs/openid-connect-core-1_0.html>.
-
-   [TokenRequestV1]
-              "Kubernetes Token Request API V1", August 2024,
-              <https://kubernetes.io/docs/reference/kubernetes-api/
-              authentication-resources/token-request-v1/>.
-
-   [TokenReviewV1]
-              "Kubernetes Token Review API V1", August 2024,
-              <https://kubernetes.io/docs/reference/kubernetes-api/
-              authentication-resources/token-review-v1/>.
+   While [RFC7521] and [RFC7523] are the proposed standards for this
+   pattern, some authorization servers use [RFC8693] or a custom API for
+   the issuance of an access token based on an existing platform
+   identity credentials.  These pattern are not recommended and prevent
+   interoperability.
 
 Authors' Addresses
 
@@ -702,5 +806,5 @@ Authors' Addresses
 
 
    Arndt Schwenkschuster
-   Microsoft
+   SPIRL
    Email: arndts.ietf@gmail.com
