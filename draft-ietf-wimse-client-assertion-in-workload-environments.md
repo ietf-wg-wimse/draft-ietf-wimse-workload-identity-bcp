@@ -95,7 +95,7 @@ This specifications describes a meta flow in {{overview}}, gives security recomm
 
 Workloads often require access to external resources to perform their tasks. For example, access to a database, a web server or another workload. These resources are protected by an authorization server and can only be accessed with an access token. The challenge for workloads is to get this access token issued.
 
-Traditionally, workloads were provisioned with client credentials and use the corresponding client credential flow (Section 1.3.4 {{RFC6749}}) to retrieve an access token. This model comes with a set of challenges that make it insecure and high-maintaince. Secret material needs to be provisioned and rotated, often manually. It also can be stolen and used by attackers to impersonate the workload.
+Traditionally, workloads were provisioned with client credentials and use the corresponding client credential flow (Section 1.3.4 {{RFC6749}}) to retrieve an access token. This model comes with a set of challenges that make it insecure and high-maintenance. Secret materials need to be provisioned and rotated, which often happens manually. It also can be stolen and used by attackers to impersonate the workload.
 
 A solution to this problem is to not provision secret material to the workload and use the platform the workload runs on to attest for it. Many workload platforms offer a credential, in most cases a JWT token. Signed by a platform-internal authorization server, the credential attests the workload and its attributes. Based on {{RFC7521}} and its JWT profile {{RFC7523}}, this credential can then be used as a client assertion towards a different authorization server.
 
@@ -190,7 +190,7 @@ All security considerations in section 8 of {{RFC7521}} apply.
 
 ## Issuer, subject and audience validation
 
-Any authorization server that validate and accept platform issued credentials MUST maintain take the following claims into account before accepting assertions:
+Any authorization server that validates and accepts platform-issued credentials MUST take the following claims into account before accepting assertions:
 
 * Issuer
 * Subject
@@ -289,7 +289,7 @@ To validate service account tokens, Kubernetes offers workloads to:
 |    +----^----------------^------+                     |
 |         |                |                            |
 |         |                |                            |
-|    1) schedule     2) project service                 |
+|    1) schedule     2) projected service                 |
 |         |             account token                   |
 |         |                |                            |
 |   +-----+----------------+-------------------+        |
@@ -308,7 +308,7 @@ The steps shown in {{fig-kubernetes}} are:
 
 * 2) The Kubernetes Control Plane projects the service account token into the workload. This step is also much simplified and technically happens alongside the scheduling with step 1.
 
-* 3) Workloads present the project service account token as a client assertion towards an external authorization server according to {{RFC7523}}.
+* 3) Workloads present the projected service account token as a client assertion towards an external authorization server according to {{RFC7523}}.
 
 * 4) On success, an access token is returned to the workload to access the protected resource.
 
@@ -407,7 +407,8 @@ The steps shown in {{fig-spiffe}} are:
 
 * 4) The access token is used to access the protected resource in the external authorization domain.
 
-The claims of a JWT-SVID for example looks like this.
+The claims of a JWT-SVID for example look like this:
+
 ~~~json
 {
   "aud": [
