@@ -51,7 +51,7 @@ author:
       ins: A. Schwenkschuster
       name: Arndt Schwenkschuster
       email: arndts.ietf@gmail.com
-      org: Microsoft
+      org: SPIRL
 
 normative:
   RFC2119:
@@ -62,6 +62,7 @@ normative:
   RFC8414:
   RFC7519:
   RFC7517:
+  RFC8693:
 informative:
   OIDC:
      author:
@@ -82,12 +83,11 @@ informative:
      target: https://kubernetes.io/docs/reference/kubernetes-api/authentication-resources/token-request-v1/
      date: 28 August 2024
 
-
 --- abstract
 
 The use of the OAuth 2.0 framework for container orchestration systems poses a challenge as managing secrets, such as client_id and client_secret, can be complex and error-prone. Instead of manual provisioning these credentials the industry has moved to a federation-based approach where credentials of the underlying workload platform are used as assertions towards an OAuth authorization server leveraging the Client Assertion Flow {{RFC7521}}, in particular {{RFC7523}}.
 
-This approach is seen in the industry across many workload environments, this document outlines common patterns and their use cases.
+This specifications describes a meta flow in {{overview}}, gives security reccomendations in {{reccomendations}} and outlines concrete patterns in {{patterns}}.
 
 --- middle
 
@@ -95,9 +95,9 @@ This approach is seen in the industry across many workload environments, this do
 
 Workloads often require access to external resources to perform their tasks. For example, access to a database, a web server or another workload. These resources are protected by an authorization server and can only be accessed with an access token. The challenge for workloads is to get this access token issued.
 
-Traditionally, workloads can be provisioned with client secrets credentials and use the client_credential flow to retrieve an access token. This model comes with a set of challenges that make it insecure and high-maintaince. Client secrets need to be manually provisioned and rotated. They can be stolen and used by attackers to impersonate the workload.
+Traditionally, workloads were provisioned with client credentials and use the corresponding client credential flow (Section 1.3.4 {{RFC6749}}) to retrieve an access token. This model comes with a set of challenges that make it insecure and high-maintaince. Secret material needs to be provisioned and rotated, often manually. It also can be stolen and used by attackers to impersonate the workload.
 
-A solution to this problem is to not provision secret material to the workload itself but use the workload platform to attest for that workload. Many workload platforms offer a credential, in most cases a JWT token. Signed by a platform-internal authorization server, this credential attests the workload and its attributes. Based on {{RFC7521}} and its JWT profile {{RFC7523}}, this credential can then be used as a client assertion towards a different authorization server.
+A solution to this problem is to not provision secret material to the workload and use the platform the workload runs on to attest for it. Many workload platforms offer a credential, in most cases a JWT token. Signed by a platform-internal authorization server, the credential attests the workload and its attributes. Based on {{RFC7521}} and its JWT profile {{RFC7523}}, this credential can then be used as a client assertion towards a different authorization server.
 
 # Terminology
 
@@ -107,7 +107,9 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 BCP 14 {{RFC2119}} {{RFC8174}} when, and only when, they appear in all
 capitals, as shown here.
 
-The terms 'workload' and 'container' are used interchangeably.
+For the scope of this specification, the term authorization server is only used for the authorization server of the external authorization domain as highlighted in {{fig-overview}}.
+
+Even though, technically, the platform credential is also issued by an authorization server within the workload platform, this specification only refers to it as "platform issuer" or just "platform".
 
 # OAuth Assertion in Workload Environments
 
@@ -153,7 +155,7 @@ The figure outlines the following steps which are applicable in any pattern.
 
 * 4) The aaccess token is used to access the protected resource in the external authorization domain.
 
-Accessing different protected resources may require steps 2) to 4) again with different scope parameters. Accessing a protected resource in an entirely different authorization domain often requires the entire flow to be followed again, to retrieve a new platform-issued credential with an audience for the other authorization server. This, however, differs based on the platform and implementation.
+Accessing different protected resources may require steps 2) to 4) again with different scope parameters. Accessing a protected resource in an entirely different authorization domain often requires the entire flow to be followed again, to retrieve a new platform-issued credential with an audience for the external authorization server. This, however, differs based on the platform and implementation.
 
 ## Credential format
 
@@ -181,6 +183,55 @@ sub
 
 audience
 : One or many audiences the platform issued credential is eligable for. This is crucial when presenting the credential as an assertion towards the external authorization server which MUST identify itself as an audience present in the assertion.
+
+# Security Reccomendations {#reccomendations}
+
+All security considerations in section 8 of {{RFC7521}} apply.
+
+## Issuer, subject and audience validation
+
+Any authorization server that validate and accept platform issued credentials MUST maintain take the following claims into account before accepting assertions:
+
+* Issuer
+* Subject
+* Audience
+* Expiration
+
+Failure to verify any of these properties can result in impersonation or accepting an assertion that was issued for a different purpose.
+
+## Token type validation
+
+Authorization servers MUST validate the token type of the assertion. For example, OAuth Refresh or ID tokens MUST NOT be accepted.
+
+## Custom claims are important for context
+
+Some platform issued credentials have custom claims that are vital for context and are required to be validated. For example in a continuous integration and deployment platform where a workload is scheduled for a GIT repository, the branch is crucial. A 'main' branch may be protected and considered trusted to federate to external authorization servers, other branches may not be and are not allowed to access protected resources.
+
+Authorization servers that validate assertions SHOULD make use of these claims. Platform issuers SHOULD allow differentiation based on the subject claim alone.
+
+## Token lifetime
+
+Tokens SHOULD NOT exceed the lifetime of the workloads they represent. For example, a workload that has an expected lifetime of an hour should not receive a token valid for 2 hours or more.
+
+For the scope of this specification, where a platform issued credential is used to authenticate to retrieve an access token for an external authorization domain, a short-lived credential is reccomended.
+
+## Workload lifecycle and invalidation
+
+Platform issuers SHOULD invalidate those when the workload stops, pauses or ceases to exist. How these credentials are invalidated is not in scope of this specification.
+
+## Proof of possession
+
+Credentials SHOULD be bound to workloads and proof of possession SHOULD be performed when these credentials are used. This mitigates token theft. This proof of possession applies to the platform credential and the access token of the external authorization domains.
+
+# IANA Considerations {#IANA}
+
+This document does not require actions by IANA.
+
+# Acknowledgements
+
+Add your name here.
+
+--- back
 
 # Patterns {#patterns}
 
@@ -481,16 +532,14 @@ The steps shown in {{fig-cicd}} are:
 
 Tokens of different providers look different, but all of them contain claims carrying the basic context of the executed tasks such as source code management data (e.g. git branch), initiation and more.
 
-# Security Considerations
+# Variations {#variations}
 
-This entire document is about security.
+## Direct access to protected resources
 
-# IANA Considerations {#IANA}
+Resource servers that protect resources may choose to trust multiple authorization servers, including the one that issues the platform identities. Instead of using the platform issued identity to receive an access token of a different authorization domain, workloads can directly use the platform issued identity to access a protected resource.
 
-This document does not require actions by IANA.
+In this case, technically, the protected resource and workload are part of the same authorization domain.
 
-# Acknowledgements
+## Custom assertion flows
 
-Add your name here.
-
---- back
+While {{RFC7521}} and {{RFC7523}} are the proposed standards for this pattern, some authorization servers use {{RFC8693}} or a custom API for the issuance of an access token based on an existing platform identity credentials. These pattern are not reccommended and prevent interoperability.
