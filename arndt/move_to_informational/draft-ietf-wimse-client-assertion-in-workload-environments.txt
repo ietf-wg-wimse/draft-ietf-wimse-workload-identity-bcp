@@ -5,13 +5,13 @@
 WIMSE                                                         B. Hofmann
 Internet-Draft                                             H. Tschofenig
 Intended status: Informational                                   Siemens
-Expires: 24 April 2025                                       E. Giordano
+Expires: 25 April 2025                                       E. Giordano
                                                                    Nokia
                                                             Y. Rosomakho
                                                                  Zscaler
                                                       A. Schwenkschuster
                                                                    SPIRL
-                                                         21 October 2024
+                                                         22 October 2024
 
 
           OAuth 2.0 Client Assertion in Workload Environments
@@ -47,7 +47,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 24 April 2025.
+   This Internet-Draft will expire on 25 April 2025.
 
 Copyright Notice
 
@@ -527,8 +527,8 @@ A.2.  Secure Production Identity Framework For Everyone (SPIFFE)
    Workload API.
 
    For the scope of this document, the JWT formatted credential is the
-   most relevant one.  SPIFFE referres to it as "JWT-SVID" (JWT - Single
-   Verifyable Identity Document).
+   most relevant one.  SPIFFE referres to it as "JWT-SVID" (JWT - SPIFFE
+   Verifiable Identity Document).
 
    Workloads are required to specify at least one audience when
    requesting a JWT-SVID from the Workload API.
