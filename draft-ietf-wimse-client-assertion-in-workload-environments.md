@@ -351,7 +351,7 @@ As an example, the following JSON showcases the claims a Kubernetes Service Acco
 
 Secure Production Identity Framework For Everyone, also known as SPIFFE, is a cloud native compute foundation (CNCF) adopted project which defines an API defined called "Workload API" to delivery machine identity to workloads. Workloads can retrieve either X509 based or JWT credentials without the need to authenticate making it very easy to use. How workloads authenticate on the API is not part of the specification. It is common to use platform metadata from the operating system and the workload platform for authentication on the Workload API.
 
-For the scope of this document, the JWT formatted credential is the most relevant one. SPIFFE referres to it as "JWT-SVID" (JWT - Single Verifyable Identity Document).
+For the scope of this document, the JWT formatted credential is the most relevant one. SPIFFE referres to it as "JWT-SVID" (JWT - SPIFFE Verifiable Identity Document).
 
 Workloads are required to specify at least one audience when requesting a JWT-SVID from the Workload API.
 
