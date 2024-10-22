@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-10-20T00:58:16.321363+00:00",
+  "timestamp": "2024-10-22T00:54:31.944605+00:00",
   "repo": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
   "labels": [
     {
@@ -309,22 +309,22 @@
     {
       "number": 8,
       "id": "PR_kwDOL34A-M5-_YSo",
-      "title": "Move to informational & add other workload environments",
+      "title": "Move to generic workload platform flow",
       "url": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp/pull/8",
       "state": "OPEN",
       "author": "arndt-s",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
-      "body": "",
+      "body": "Facelift for current draft.\r\n\r\nThis change consists of the following:\r\n- Moving away from Kubernetes only to a more generic \"workload platform\" pattern.\r\n- A new appendix outlines concrete platforms such as\r\n   - Kubernetes\r\n   - Cloud environments\r\n   - SPIFFE\r\n   - Continuous Integration / Deployment \r\n- Adds security recommendations\r\n",
       "createdAt": "2024-10-17T15:59:25Z",
-      "updatedAt": "2024-10-18T14:30:03Z",
+      "updatedAt": "2024-10-21T13:13:58Z",
       "baseRepository": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
       "baseRefName": "main",
       "baseRefOid": "ef4a18f9bfa6828f31c75385fe968ead032b4634",
       "headRepository": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
       "headRefName": "arndt/move_to_informational",
-      "headRefOid": "f2a01f105f01d89bdd10bffe64bc679616ee914c",
+      "headRefOid": "5fc689d4a579022794c93d613a905889949d9fd3",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -492,6 +492,46 @@
               "body": "Awesome, I feel like a Picasso now \ud83d\ude80 \ud83d\ude04 ",
               "createdAt": "2024-10-18T09:11:04Z",
               "updatedAt": "2024-10-18T09:11:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL34A-M6N8bmr",
+          "commit": {
+            "abbreviatedOid": "f2a01f1"
+          },
+          "author": "edoardogiordano",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-21T09:18:19Z",
+          "updatedAt": "2024-10-21T09:18:19Z",
+          "comments": [
+            {
+              "originalPosition": 154,
+              "body": "Typo, aaccess -> access",
+              "createdAt": "2024-10-21T09:18:19Z",
+              "updatedAt": "2024-10-21T09:18:19Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL34A-M6N9Tc8",
+          "commit": {
+            "abbreviatedOid": "f2a01f1"
+          },
+          "author": "bc-pi",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-21T10:53:42Z",
+          "updatedAt": "2024-10-21T10:53:42Z",
+          "comments": [
+            {
+              "originalPosition": 154,
+              "body": "per @edoardogiordano ...\r\n```suggestion\r\n* 4) The access token is used to access the protected resource in the external authorization domain.\r\n```",
+              "createdAt": "2024-10-21T10:53:42Z",
+              "updatedAt": "2024-10-21T10:53:42Z"
             }
           ]
         }
