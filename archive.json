@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-10-22T00:54:31.944605+00:00",
+  "timestamp": "2024-10-24T00:53:27.427945+00:00",
   "repo": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
   "labels": [
     {
@@ -318,13 +318,13 @@
       "labels": [],
       "body": "Facelift for current draft.\r\n\r\nThis change consists of the following:\r\n- Moving away from Kubernetes only to a more generic \"workload platform\" pattern.\r\n- A new appendix outlines concrete platforms such as\r\n   - Kubernetes\r\n   - Cloud environments\r\n   - SPIFFE\r\n   - Continuous Integration / Deployment \r\n- Adds security recommendations\r\n",
       "createdAt": "2024-10-17T15:59:25Z",
-      "updatedAt": "2024-10-21T13:13:58Z",
+      "updatedAt": "2024-10-22T17:57:16Z",
       "baseRepository": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
       "baseRefName": "main",
       "baseRefOid": "ef4a18f9bfa6828f31c75385fe968ead032b4634",
       "headRepository": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
       "headRefName": "arndt/move_to_informational",
-      "headRefOid": "5fc689d4a579022794c93d613a905889949d9fd3",
+      "headRefOid": "498c6093ffe1a61746b065dbb8cb39e1c8bc2f91",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -532,6 +532,110 @@
               "body": "per @edoardogiordano ...\r\n```suggestion\r\n* 4) The access token is used to access the protected resource in the external authorization domain.\r\n```",
               "createdAt": "2024-10-21T10:53:42Z",
               "updatedAt": "2024-10-21T10:53:42Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL34A-M6OGfR7",
+          "commit": {
+            "abbreviatedOid": "5fc689d"
+          },
+          "author": "ju-cu",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-22T06:42:42Z",
+          "updatedAt": "2024-10-22T06:53:02Z",
+          "comments": [
+            {
+              "originalPosition": 354,
+              "body": "```suggestion\r\nFor the scope of this document, the JWT formatted credential is the most relevant one. SPIFFE refers to it as \"JWT-SVID\" (JWT - SPIFFE Verifiable Identity Document).\r\n```\r\nSVID is short for SPIFFE Verifiable Identity Document, see https://spiffe.io/docs/latest/spiffe-about/spiffe-concepts/#spiffe-verifiable-identity-document-svid  ",
+              "createdAt": "2024-10-22T06:42:42Z",
+              "updatedAt": "2024-10-22T06:53:02Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL34A-M6OIWfh",
+          "commit": {
+            "abbreviatedOid": "5fc689d"
+          },
+          "author": "arndt-s",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-22T09:24:29Z",
+          "updatedAt": "2024-10-22T09:24:29Z",
+          "comments": [
+            {
+              "originalPosition": 354,
+              "body": "Thank you! ",
+              "createdAt": "2024-10-22T09:24:29Z",
+              "updatedAt": "2024-10-22T09:24:30Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL34A-M6OJgcY",
+          "commit": {
+            "abbreviatedOid": "498c609"
+          },
+          "author": "yaronf",
+          "authorAssociation": "NONE",
+          "state": "CHANGES_REQUESTED",
+          "body": "All in all, I like the new structure. Thanks!",
+          "createdAt": "2024-10-22T11:07:51Z",
+          "updatedAt": "2024-10-22T11:30:05Z",
+          "comments": [
+            {
+              "originalPosition": 2,
+              "body": "I think \"runtime environments\" is a more common name.",
+              "createdAt": "2024-10-22T11:07:51Z",
+              "updatedAt": "2024-10-22T11:30:05Z"
+            },
+            {
+              "originalPosition": 90,
+              "body": "```suggestion\r\nThis specification describes a meta flow in {{overview}}, gives security recommendations in {{recommendations}} and outlines concrete patterns in {{patterns}}.\r\n```\r\n\r\nBut also you don't normally dive down into sections in the abstract. This works better in the Intro.",
+              "createdAt": "2024-10-22T11:09:47Z",
+              "updatedAt": "2024-10-22T11:30:05Z"
+            },
+            {
+              "originalPosition": 101,
+              "body": "I suggest adding a paragraph saying something like:\r\n\r\n> This document is published by the WIMSE working group. However it refers to existing industry practices which may or may not be in line with the (currently work in progress) WIMSE architecture and the protocols derived from it. Practitioners are advised to keep that in mind as they devise their adoption strategy.",
+              "createdAt": "2024-10-22T11:14:05Z",
+              "updatedAt": "2024-10-22T11:30:05Z"
+            },
+            {
+              "originalPosition": 156,
+              "body": "This terminology is very confusing to first-timers. Please say, at least once, that when we discuss \"accessing a resource\" we also include \"sending a message\" or \"making a REST call\".",
+              "createdAt": "2024-10-22T11:17:21Z",
+              "updatedAt": "2024-10-22T11:30:05Z"
+            },
+            {
+              "originalPosition": 170,
+              "body": "target-audience?",
+              "createdAt": "2024-10-22T11:19:01Z",
+              "updatedAt": "2024-10-22T11:30:05Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL34A-M6ONjyz",
+          "commit": {
+            "abbreviatedOid": "498c609"
+          },
+          "author": "bc-pi",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-22T17:57:15Z",
+          "updatedAt": "2024-10-22T17:57:16Z",
+          "comments": [
+            {
+              "originalPosition": 90,
+              "body": "that guy makes a good point ",
+              "createdAt": "2024-10-22T17:57:15Z",
+              "updatedAt": "2024-10-22T17:57:16Z"
             }
           ]
         }
