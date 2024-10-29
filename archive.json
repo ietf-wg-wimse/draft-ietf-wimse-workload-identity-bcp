@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-10-27T00:57:49.846947+00:00",
+  "timestamp": "2024-10-29T00:55:10.690315+00:00",
   "repo": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
   "labels": [
     {
@@ -318,7 +318,7 @@
       "labels": [],
       "body": "Facelift for current draft.\r\n\r\nThis change consists of the following:\r\n- Moving away from Kubernetes only to a more generic \"workload platform\" pattern.\r\n- A new appendix outlines concrete platforms such as\r\n   - Kubernetes\r\n   - Cloud environments\r\n   - SPIFFE\r\n   - Continuous Integration / Deployment \r\n- Adds security recommendations\r\n",
       "createdAt": "2024-10-17T15:59:25Z",
-      "updatedAt": "2024-10-22T17:57:16Z",
+      "updatedAt": "2024-10-28T19:45:29Z",
       "baseRepository": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
       "baseRefName": "main",
       "baseRefOid": "ef4a18f9bfa6828f31c75385fe968ead032b4634",
@@ -329,7 +329,22 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "hannestschofenig",
+          "authorAssociation": "COLLABORATOR",
+          "body": "FWIW there is no need to change the filename of the document. The filename is an ephermal aspect of the IETF publication process anyway.",
+          "createdAt": "2024-10-28T15:55:34Z",
+          "updatedAt": "2024-10-28T15:55:34Z"
+        },
+        {
+          "author": "jricher",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "@hannestschofenig It has already been decided that we will change the name of the document including its file name to better reflect the content and nature of the document. Having `-bcp` in the document name string has already confused a number of people.",
+          "createdAt": "2024-10-28T19:44:42Z",
+          "updatedAt": "2024-10-28T19:44:42Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOL34A-M6NmxkE",
@@ -636,6 +651,86 @@
               "body": "that guy makes a good point ",
               "createdAt": "2024-10-22T17:57:15Z",
               "updatedAt": "2024-10-22T17:57:16Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL34A-M6PBaTB",
+          "commit": {
+            "abbreviatedOid": "498c609"
+          },
+          "author": "hannestschofenig",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-28T15:53:57Z",
+          "updatedAt": "2024-10-28T15:53:58Z",
+          "comments": [
+            {
+              "originalPosition": 141,
+              "body": "```suggestion\r\n |  |        Workload          +<---------> issued by   |  |\r\n```",
+              "createdAt": "2024-10-28T15:53:57Z",
+              "updatedAt": "2024-10-28T15:53:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL34A-M6PBarY",
+          "commit": {
+            "abbreviatedOid": "498c609"
+          },
+          "author": "hannestschofenig",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-28T15:54:32Z",
+          "updatedAt": "2024-10-28T15:54:32Z",
+          "comments": [
+            {
+              "originalPosition": 170,
+              "body": "target audience is better than custom audience.",
+              "createdAt": "2024-10-28T15:54:32Z",
+              "updatedAt": "2024-10-28T15:54:32Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL34A-M6PBb0o",
+          "commit": {
+            "abbreviatedOid": "498c609"
+          },
+          "author": "hannestschofenig",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-28T15:56:19Z",
+          "updatedAt": "2024-10-28T15:56:19Z",
+          "comments": [
+            {
+              "originalPosition": 101,
+              "body": "Such type of statements tend not to age well.",
+              "createdAt": "2024-10-28T15:56:19Z",
+              "updatedAt": "2024-10-28T15:56:19Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL34A-M6PDf_1",
+          "commit": {
+            "abbreviatedOid": "498c609"
+          },
+          "author": "jricher",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-28T19:45:29Z",
+          "updatedAt": "2024-10-28T19:45:29Z",
+          "comments": [
+            {
+              "originalPosition": 141,
+              "body": "@hannestschofenig this edit misaligns the diagram, was the intent to just make it a double-headed arrow? If so that syntax would be as follows:\r\n\r\n```suggestion\r\n |  |        Workload          <-----------> issued by   |  |\r\n```",
+              "createdAt": "2024-10-28T19:45:29Z",
+              "updatedAt": "2024-10-28T19:45:29Z"
             }
           ]
         }
