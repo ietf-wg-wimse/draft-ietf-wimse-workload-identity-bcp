@@ -5,13 +5,13 @@
 WIMSE                                                         B. Hofmann
 Internet-Draft                                             H. Tschofenig
 Intended status: Informational                                   Siemens
-Expires: 25 April 2025                                       E. Giordano
+Expires: 8 May 2025                                          E. Giordano
                                                                    Nokia
                                                             Y. Rosomakho
                                                                  Zscaler
                                                       A. Schwenkschuster
                                                                    SPIRL
-                                                         22 October 2024
+                                                         4 November 2024
 
 
           OAuth 2.0 Client Assertion in Workload Environments
@@ -47,7 +47,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 25 April 2025.
+   This Internet-Draft will expire on 8 May 2025.
 
 Copyright Notice
 
@@ -160,9 +160,9 @@ Table of Contents
     |         |         |     |                                |
     |  +------+---------v-----+---+           +-------------+  |
     |  |                          |           | Credential  |  |
-    |  |        Workload          +-----------> issued by   |  |
-    |  |                          |  1) get   | Platform    |  |
-    |  +--------------------------+           +-------------+  |
+    |  |        Workload          <-----------> issued by   |  |
+    |  |                          | 1) pull/  | Platform    |  |
+    |  +--------------------------+    push   +-------------+  |
     +----------------------------------------------------------+
 
       Figure 1: OAuth2 Assertion Flow in generic Workload Environment
@@ -171,8 +171,8 @@ Table of Contents
    pattern.
 
    *  1) retrieve credential issued by platform.  The way this is
-      achieved and whether this is workload or platform initiated
-      differs based on the platform.
+      achieved and whether this is workload (pull) or platform (push)
+      initiated differs based on the platform.
 
    *  2) present credential as an assertion towards an authorization
       server in an external authorization domain.  This step uses the
@@ -449,12 +449,12 @@ A.1.  Kubernetes
    |    +----^----------------^------+                     |
    |         |                |                            |
    |         |                |                            |
-   |    1) schedule     2) projected service                 |
+   |    1) schedule     2) projected service               |
    |         |             account token                   |
    |         |                |                            |
    |   +-----+----------------+-------------------+        |
    |   |                                          |        |
-   |   |        Kubernetes Control Plane          |        |
+   |   |     Kubernetes Control Plane / kubelet   |        |
    |   |                                          |        |
    |   +------------------------------------------+        |
    |                                                       |
@@ -731,9 +731,9 @@ A.4.  Continuoues integration/deployment systems
    |                                                          |
    |                    Task (Workload)                       |
    |                                                          |
-   +--------^---------------------------+---------------------+
+   +--------^---------------------------^---------------------+
             |                           |
-      1)schedules                2)retrieve identity
+      1) schedules              2) retrieve identity
             |                           |
    +--------+---------------------------v---------------------+
    |                                                          |

@@ -14,17 +14,17 @@
        The use of the OAuth 2.0 framework for container orchestration systems poses a challenge as managing secrets, such as client_id and client_secret, can be complex and error-prone. Instead of manual provisioning these credentials the industry has moved to a federation-based approach where credentials of the underlying workload platform are used as assertions towards an OAuth authorization server leveraging the Client Assertion Flow  , in particular  . 
        This specifications describes a meta flow in  , gives security recommendations in   and outlines concrete patterns in  . 
     " name="description">
-<meta content="xml2rfc 3.23.2" name="generator">
+<meta content="xml2rfc 3.24.0" name="generator">
 <meta content="Internet-Draft" name="keyword">
 <meta content="draft-ietf-wimse-client-assertion-in-workload-environments-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.23.2
+  xml2rfc 3.24.0
     Python 3.12.7
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.1.0
     Jinja2 3.1.4
-    lxml 4.9.4
+    lxml 5.3.0
     platformdirs 4.3.6
     pycountry 22.3.5
     PyYAML 6.0.1
@@ -166,31 +166,6 @@
 }
 
 @font-face {
-  font-family: 'Cabin Condensed';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: local('Cabin Condensed SemiBold'), local('CabinCondensed-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/cabincondensed-semibold-vietnamese.woff2') format('woff2');
-  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
-}
-@font-face {
-  font-family: 'Cabin Condensed';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: local('Cabin Condensed SemiBold'), local('CabinCondensed-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/cabincondensed-semibold-latin-ext.woff2') format('woff2');
-  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-@font-face {
-  font-family: 'Cabin Condensed';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: local('Cabin Condensed SemiBold'), local('CabinCondensed-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/cabincondensed-semibold-latin.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-@font-face {
   font-family: 'Oxygen Mono';
   font-style: normal;
   font-weight: 400;
@@ -207,6 +182,77 @@
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 :root {
   color-scheme: light dark;
   --background-color: #fff;
@@ -219,6 +265,7 @@
   --pilcrow-strong: #bbb;
   --small-font-size: 14.5px;
   --font-mono: 'Oxygen Mono', monospace;
+  --font-title: "Sofia Sans Semi Condensed", sans-serif;
   scrollbar-color: #bbb #eee;
 }
 body {
@@ -237,8 +284,8 @@ body {
 
 /* headings */
 h1, h2, h3, h4, h5, h6 {
-  font-family: "Cabin Condensed", sans-serif;
-  font-weight: 600;
+  font-family: var(--font-title);
+  font-weight: 680;
   margin: 0.8em 0 0.3em;
   font-size-adjust: 0.5;
   color: var(--title-color);
@@ -646,6 +693,12 @@ sub, sup {
   padding: 0.75em 0 2em 0;
   margin-bottom: 1em;
 }
+@media screen {
+  #toc nav {
+    font-family: var(--font-title);
+    font-weight: 360;
+  }
+}
 #toc nav ul {
   margin: 0 0.5em 0 0;
   padding: 0;
@@ -1029,11 +1082,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">Workload Identity</td>
-<td class="right">October 2024</td>
+<td class="right">November 2024</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Hofmann, et al.</td>
-<td class="center">Expires 25 April 2025</td>
+<td class="center">Expires 8 May 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1046,12 +1099,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-wimse-client-assertion-in-workload-environments-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-10-22" class="published">22 October 2024</time>
+<time datetime="2024-11-04" class="published">4 November 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-04-25">25 April 2025</time></dd>
+<dd class="expires"><time datetime="2025-05-08">8 May 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1102,7 +1155,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 25 April 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 8 May 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1273,7 +1326,8 @@ capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
                 <path d="M 176,208 L 176,320" fill="none" stroke="black"></path>
                 <path d="M 224,240 L 224,320" fill="none" stroke="black"></path>
                 <path d="M 240,80 L 240,144" fill="none" stroke="black"></path>
-                <path d="M 256,320 L 256,384" fill="none" stroke="black"></path>
+                <path d="M 256,320 L 256,336" fill="none" stroke="black"></path>
+                <path d="M 256,368 L 256,384" fill="none" stroke="black"></path>
                 <path d="M 288,80 L 288,144" fill="none" stroke="black"></path>
                 <path d="M 352,320 L 352,336" fill="none" stroke="black"></path>
                 <path d="M 352,368 L 352,384" fill="none" stroke="black"></path>
@@ -1302,6 +1356,7 @@ capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
                 <path d="M 16,400 L 488,400" fill="none" stroke="black"></path>
                 <polygon class="arrowhead" points="384,144 372,138.4 372,149.6" fill="black" transform="rotate(270,376,144)"></polygon>
                 <polygon class="arrowhead" points="360,352 348,346.4 348,357.6" fill="black" transform="rotate(0,352,352)"></polygon>
+                <polygon class="arrowhead" points="264,352 252,346.4 252,357.6" fill="black" transform="rotate(180,256,352)"></polygon>
                 <polygon class="arrowhead" points="184,320 172,314.4 172,325.6" fill="black" transform="rotate(90,176,320)"></polygon>
                 <polygon class="arrowhead" points="104,144 92,138.4 92,149.6" fill="black" transform="rotate(270,96,144)"></polygon>
                 <g class="text">
@@ -1326,9 +1381,10 @@ capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
                   <text x="140" y="356">Workload</text>
                   <text x="388" y="356">issued</text>
                   <text x="428" y="356">by</text>
-                  <text x="284" y="372">1)</text>
-                  <text x="312" y="372">get</text>
+                  <text x="276" y="372">1)</text>
+                  <text x="312" y="372">pull/</text>
                   <text x="396" y="372">Platform</text>
+                  <text x="308" y="388">push</text>
                 </g>
               </svg><a href="#section-3.1-2.1.1" class="pilcrow">¶</a>
 </div>
@@ -1340,7 +1396,7 @@ capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
 <p id="section-3.1-3">The figure outlines the following steps which are applicable in any pattern.<a href="#section-3.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3.1-4.1">
-            <p id="section-3.1-4.1.1">1) retrieve credential issued by platform. The way this is achieved and whether this is workload or platform initiated differs based on the platform.<a href="#section-3.1-4.1.1" class="pilcrow">¶</a></p>
+            <p id="section-3.1-4.1.1">1) retrieve credential issued by platform. The way this is achieved and whether this is workload (pull) or platform (push) initiated differs based on the platform.<a href="#section-3.1-4.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-3.1-4.2">
             <p id="section-3.1-4.2.1">2) present credential as an assertion towards an authorization server in an external authorization domain. This step uses the assertion_grant flow defined in <span>[<a href="#RFC7521" class="cite xref">RFC7521</a>]</span> and, in case of JWT format, <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>.<a href="#section-3.1-4.2.1" class="pilcrow">¶</a></p>
@@ -1609,7 +1665,7 @@ capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
 <figure id="figure-2">
           <div id="appendix-A.1-9.1">
             <div class="alignLeft art-svg artwork" id="appendix-A.1-9.1.1">
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="592" width="480" viewBox="0 0 480 592" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="592" width="464" viewBox="0 0 464 592" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
                 <path d="M 8,32 L 8,176" fill="none" stroke="black"></path>
                 <path d="M 8,272 L 8,576" fill="none" stroke="black"></path>
                 <path d="M 24,80 L 24,144" fill="none" stroke="black"></path>
@@ -1632,8 +1688,7 @@ capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
                 <path d="M 384,480 L 384,544" fill="none" stroke="black"></path>
                 <path d="M 424,80 L 424,144" fill="none" stroke="black"></path>
                 <path d="M 456,32 L 456,176" fill="none" stroke="black"></path>
-                <path d="M 456,272 L 456,416" fill="none" stroke="black"></path>
-                <path d="M 456,448 L 456,576" fill="none" stroke="black"></path>
+                <path d="M 456,272 L 456,576" fill="none" stroke="black"></path>
                 <path d="M 8,32 L 456,32" fill="none" stroke="black"></path>
                 <path d="M 24,80 L 240,80" fill="none" stroke="black"></path>
                 <path d="M 256,80 L 424,80" fill="none" stroke="black"></path>
@@ -1681,12 +1736,13 @@ capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
                   <text x="180" y="436">2)</text>
                   <text x="232" y="436">projected</text>
                   <text x="304" y="436">service</text>
-                  <text x="472" y="436">|</text>
                   <text x="224" y="452">account</text>
                   <text x="280" y="452">token</text>
-                  <text x="148" y="516">Kubernetes</text>
-                  <text x="224" y="516">Control</text>
-                  <text x="280" y="516">Plane</text>
+                  <text x="124" y="516">Kubernetes</text>
+                  <text x="200" y="516">Control</text>
+                  <text x="256" y="516">Plane</text>
+                  <text x="288" y="516">/</text>
+                  <text x="328" y="516">kubelet</text>
                 </g>
               </svg><a href="#appendix-A.1-9.1.1" class="pilcrow">¶</a>
 </div>
@@ -2050,12 +2106,14 @@ capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
                 <path d="M 8,256 L 192,256" fill="none" stroke="black"></path>
                 <path d="M 208,256 L 480,256" fill="none" stroke="black"></path>
                 <path d="M 8,320 L 72,320" fill="none" stroke="black"></path>
-                <path d="M 88,320 L 480,320" fill="none" stroke="black"></path>
+                <path d="M 88,320 L 296,320" fill="none" stroke="black"></path>
+                <path d="M 312,320 L 480,320" fill="none" stroke="black"></path>
                 <path d="M 8,384 L 296,384" fill="none" stroke="black"></path>
                 <path d="M 312,384 L 480,384" fill="none" stroke="black"></path>
                 <path d="M 8,448 L 480,448" fill="none" stroke="black"></path>
                 <polygon class="arrowhead" points="400,128 388,122.4 388,133.6" fill="black" transform="rotate(270,392,128)"></polygon>
                 <polygon class="arrowhead" points="312,384 300,378.4 300,389.6" fill="black" transform="rotate(90,304,384)"></polygon>
+                <polygon class="arrowhead" points="312,320 300,314.4 300,325.6" fill="black" transform="rotate(270,304,320)"></polygon>
                 <polygon class="arrowhead" points="208,256 196,250.4 196,261.6" fill="black" transform="rotate(90,200,256)"></polygon>
                 <polygon class="arrowhead" points="96,128 84,122.4 84,133.6" fill="black" transform="rotate(270,88,128)"></polygon>
                 <polygon class="arrowhead" points="88,320 76,314.4 76,325.6" fill="black" transform="rotate(270,80,320)"></polygon>
@@ -2077,8 +2135,10 @@ capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
                   <text x="240" y="228">token</text>
                   <text x="188" y="292">Task</text>
                   <text x="252" y="292">(Workload)</text>
-                  <text x="72" y="356">1)schedules</text>
-                  <text x="284" y="356">2)retrieve</text>
+                  <text x="36" y="356">1)</text>
+                  <text x="88" y="356">schedules</text>
+                  <text x="244" y="356">2)</text>
+                  <text x="292" y="356">retrieve</text>
                   <text x="364" y="356">identity</text>
                   <text x="108" y="420">Continuous</text>
                   <text x="200" y="420">Integration</text>
