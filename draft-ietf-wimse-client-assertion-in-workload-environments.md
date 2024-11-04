@@ -138,16 +138,16 @@ Even though, technically, the platform credential is also issued by an authoriza
  |         |         |     |                                |
  |  +------+---------v-----+---+           +-------------+  |
  |  |                          |           | Credential  |  |
- |  |        Workload          +-----------> issued by   |  |
- |  |                          |  1) get   | Platform    |  |
- |  +--------------------------+           +-------------+  |
+ |  |        Workload          <-----------> issued by   |  |
+ |  |                          | 1) pull/  | Platform    |  |
+ |  +--------------------------+    push   +-------------+  |
  +----------------------------------------------------------+
 ~~~
 {: #fig-overview title="OAuth2 Assertion Flow in generic Workload Environment"}
 
 The figure outlines the following steps which are applicable in any pattern.
 
-* 1) retrieve credential issued by platform. The way this is achieved and whether this is workload or platform initiated differs based on the platform.
+* 1) retrieve credential issued by platform. The way this is achieved and whether this is workload (pull) or platform (push) initiated differs based on the platform.
 
 * 2) present credential as an assertion towards an authorization server in an external authorization domain. This step uses the assertion_grant flow defined in {{RFC7521}} and, in case of JWT format, {{RFC7523}}.
 
@@ -289,12 +289,12 @@ To validate service account tokens, Kubernetes offers workloads to:
 |    +----^----------------^------+                     |
 |         |                |                            |
 |         |                |                            |
-|    1) schedule     2) projected service                 |
+|    1) schedule     2) projected service               |
 |         |             account token                   |
 |         |                |                            |
 |   +-----+----------------+-------------------+        |
 |   |                                          |        |
-|   |        Kubernetes Control Plane          |        |
+|   |     Kubernetes Control Plane / kubelet   |        |
 |   |                                          |        |
 |   +------------------------------------------+        |
 |                                                       |
@@ -507,9 +507,9 @@ Continuous integration and deployment systems allow their pipelines/workflows to
 |                                                          |
 |                    Task (Workload)                       |
 |                                                          |
-+--------^---------------------------+---------------------+
++--------^---------------------------^---------------------+
          |                           |
-   1)schedules                2)retrieve identity
+   1) schedules              2) retrieve identity
          |                           |
 +--------+---------------------------v---------------------+
 |                                                          |
