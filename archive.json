@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-11-03T00:57:50.378854+00:00",
+  "timestamp": "2024-11-05T00:52:36.505837+00:00",
   "repo": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
   "labels": [
     {
@@ -318,13 +318,13 @@
       "labels": [],
       "body": "Facelift for current draft.\r\n\r\nThis change consists of the following:\r\n- Moving away from Kubernetes only to a more generic \"workload platform\" pattern.\r\n- A new appendix outlines concrete platforms such as\r\n   - Kubernetes\r\n   - Cloud environments\r\n   - SPIFFE\r\n   - Continuous Integration / Deployment \r\n- Adds security recommendations\r\n",
       "createdAt": "2024-10-17T15:59:25Z",
-      "updatedAt": "2024-10-28T19:45:29Z",
+      "updatedAt": "2024-11-04T16:25:32Z",
       "baseRepository": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
       "baseRefName": "main",
       "baseRefOid": "ef4a18f9bfa6828f31c75385fe968ead032b4634",
       "headRepository": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
       "headRefName": "arndt/move_to_informational",
-      "headRefOid": "498c6093ffe1a61746b065dbb8cb39e1c8bc2f91",
+      "headRefOid": "21facf2ca783ab497584d100651a304858c3e8f1",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -731,6 +731,26 @@
               "body": "@hannestschofenig this edit misaligns the diagram, was the intent to just make it a double-headed arrow? If so that syntax would be as follows:\r\n\r\n```suggestion\r\n |  |        Workload          <-----------> issued by   |  |\r\n```",
               "createdAt": "2024-10-28T19:45:29Z",
               "updatedAt": "2024-10-28T19:45:29Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL34A-M6P25Dy",
+          "commit": {
+            "abbreviatedOid": "498c609"
+          },
+          "author": "arndt-s",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-11-04T16:25:32Z",
+          "updatedAt": "2024-11-04T16:25:32Z",
+          "comments": [
+            {
+              "originalPosition": 141,
+              "body": "Latest commit makes the arrow going both ways.",
+              "createdAt": "2024-11-04T16:25:32Z",
+              "updatedAt": "2024-11-04T16:25:32Z"
             }
           ]
         }
