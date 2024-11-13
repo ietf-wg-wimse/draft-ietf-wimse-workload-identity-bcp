@@ -1,7 +1,7 @@
 ---
 title: OAuth 2.0 Client Assertion in Workload Environments
 abbrev: Workload Identity
-docname:  draft-ietf-wimse-client-assertion-in-workload-environments-latest
+docname: draft-ietf-wimse-workload-identity-bcp-latest
 category: info
 
 ipr: trust200902
@@ -87,7 +87,7 @@ informative:
 
 The use of the OAuth 2.0 framework for container orchestration systems poses a challenge as managing secrets, such as client_id and client_secret, can be complex and error-prone. Instead of manual provisioning these credentials the industry has moved to a federation-based approach where credentials of the underlying workload platform are used as assertions towards an OAuth authorization server leveraging the Client Assertion Flow {{RFC7521}}, in particular {{RFC7523}}.
 
-This specifications describes a meta flow in {{overview}}, gives security recommendations in {{recommendations}} and outlines concrete patterns in {{patterns}}.
+This specification describes a meta flow in {{overview}}, gives security recommendations in {{recommendations}} and outlines concrete patterns in {{patterns}}.
 
 --- middle
 
@@ -153,7 +153,7 @@ The figure outlines the following steps which are applicable in any pattern.
 
 * 3) On success, an access token is returned to the workload to access the protected resource.
 
-* 4) The access token is used to access the protected resource in the external authorization domain.
+* 4) The access token is used to access a protected resource in the external authorization domain. For instance by making a HTTP call.
 
 Accessing different protected resources may require steps 2) to 4) again with different scope parameters. Accessing a protected resource in an entirely different authorization domain often requires the entire flow to be followed again, to retrieve a new platform-issued credential with an audience for the external authorization server. This, however, differs based on the platform and implementation.
 
@@ -167,7 +167,7 @@ The claims in the present assertion vary greatly based on use case and actual pl
 {
   "iss": "https://example.org",
   "sub": "my-workload",
-  "aud": "custom-audience",
+  "aud": "target-audience",
   "exp": 1729248124
 }
 ~~~
