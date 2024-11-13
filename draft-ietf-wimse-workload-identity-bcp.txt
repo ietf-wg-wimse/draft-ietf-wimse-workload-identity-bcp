@@ -90,6 +90,7 @@ Table of Contents
    Appendix B.  Variations
      B.1.  Direct access to protected resources
      B.2.  Custom assertion flows
+   Appendix C.  Document History
    Authors' Addresses
 
 1.  Introduction
@@ -791,6 +792,36 @@ B.2.  Custom assertion flows
    the issuance of an access token based on an existing platform
    identity credentials.  These pattern are not recommended and prevent
    interoperability.
+
+Appendix C.  Document History
+
+   [[ To be removed from the final specification ]]
+
+   -02
+
+   *  Move scope from Kubernetes to generic workload identity platform
+
+   *  Add various patterns to appendix
+
+      -  Kubernetes
+
+      -  Cloud providers
+
+      -  SPIFFE
+
+      -  CI/CD
+
+   *  Add some security considerations
+
+   *  Update title
+
+   -01
+
+   *  Editorial updates
+
+   -00
+
+   *  Adopted by the WIMSE WG
 
 Authors' Addresses
 
