@@ -544,3 +544,26 @@ In this case, technically, the protected resource and workload are part of the s
 ## Custom assertion flows
 
 While {{RFC7521}} and {{RFC7523}} are the proposed standards for this pattern, some authorization servers use {{RFC8693}} or a custom API for the issuance of an access token based on an existing platform identity credentials. These pattern are not recommended and prevent interoperability.
+
+# Document History
+
+   [[ To be removed from the final specification ]]
+
+   -02
+
+   * Move scope from Kubernetes to generic workload identity platform
+   * Add various patterns to appendix
+      * Kubernetes
+      * Cloud providers
+      * SPIFFE
+      * CI/CD
+   * Add some security considerations
+   * Update title
+
+   -01
+
+   * Editorial updates
+
+   -00
+
+   * Adopted by the WIMSE WG
