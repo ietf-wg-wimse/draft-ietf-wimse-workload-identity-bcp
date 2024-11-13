@@ -5,17 +5,17 @@
 WIMSE                                                         B. Hofmann
 Internet-Draft                                             H. Tschofenig
 Intended status: Informational                                   Siemens
-Expires: 8 May 2025                                          E. Giordano
+Expires: 17 May 2025                                         E. Giordano
                                                                    Nokia
                                                             Y. Rosomakho
                                                                  Zscaler
                                                       A. Schwenkschuster
                                                                    SPIRL
-                                                         4 November 2024
+                                                        13 November 2024
 
 
           OAuth 2.0 Client Assertion in Workload Environments
-   draft-ietf-wimse-client-assertion-in-workload-environments-latest
+             draft-ietf-wimse-workload-identity-bcp-latest
 
 Abstract
 
@@ -28,7 +28,7 @@ Abstract
    authorization server leveraging the Client Assertion Flow [RFC7521],
    in particular [RFC7523].
 
-   This specifications describes a meta flow in Section 3.1, gives
+   This specification describes a meta flow in Section 3.1, gives
    security recommendations in Section 4 and outlines concrete patterns
    in Appendix A.
 
@@ -47,7 +47,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 8 May 2025.
+   This Internet-Draft will expire on 17 May 2025.
 
 Copyright Notice
 
@@ -182,8 +182,9 @@ Table of Contents
    *  3) On success, an access token is returned to the workload to
       access the protected resource.
 
-   *  4) The access token is used to access the protected resource in
-      the external authorization domain.
+   *  4) The access token is used to access a protected resource in the
+      external authorization domain.  For instance by making a HTTP
+      call.
 
    Accessing different protected resources may require steps 2) to 4)
    again with different scope parameters.  Accessing a protected
@@ -207,7 +208,7 @@ Table of Contents
    {
      "iss": "https://example.org",
      "sub": "my-workload",
-     "aud": "custom-audience",
+     "aud": "target-audience",
      "exp": 1729248124
    }
 
