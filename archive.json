@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-11-12T00:52:22.969529+00:00",
+  "timestamp": "2024-11-14T00:53:28.451814+00:00",
   "repo": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
   "labels": [
     {
@@ -96,6 +96,30 @@
       "updatedAt": "2024-08-12T08:11:15Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 9,
+      "id": "I_kwDOL34A-M6eSc2H",
+      "title": "Point out that this document highlights current patterns ",
+      "url": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp/issues/9",
+      "state": "OPEN",
+      "author": "arndt-s",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "... and is not a 'best practices' document new implementations should leverage.",
+      "createdAt": "2024-11-13T14:07:37Z",
+      "updatedAt": "2024-11-13T14:08:17Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "arndt-s",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@yaronf suggested\r\n> This document is published by the WIMSE working group. However it refers to existing industry practices which may or may not be in line with the (currently work in progress) WIMSE architecture and the protocols derived from it. Practitioners are advised to keep that in mind as they devise their adoption strategy.",
+          "createdAt": "2024-11-13T14:08:15Z",
+          "updatedAt": "2024-11-13T14:08:15Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -311,24 +335,26 @@
       "id": "PR_kwDOL34A-M5-_YSo",
       "title": "Move to generic workload platform flow",
       "url": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp/pull/8",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "arndt-s",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Facelift for current draft.\r\n\r\nThis change consists of the following:\r\n- Moving away from Kubernetes only to a more generic \"workload platform\" pattern.\r\n- A new appendix outlines concrete platforms such as\r\n   - Kubernetes\r\n   - Cloud environments\r\n   - SPIFFE\r\n   - Continuous Integration / Deployment \r\n- Adds security recommendations\r\n",
       "createdAt": "2024-10-17T15:59:25Z",
-      "updatedAt": "2024-11-04T16:25:32Z",
+      "updatedAt": "2024-11-13T14:09:42Z",
       "baseRepository": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
       "baseRefName": "main",
       "baseRefOid": "ef4a18f9bfa6828f31c75385fe968ead032b4634",
       "headRepository": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
       "headRefName": "arndt/move_to_informational",
-      "headRefOid": "21facf2ca783ab497584d100651a304858c3e8f1",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "9237df5f12a84108ded7755542f87ca3dfd731b8",
+      "closedAt": "2024-11-13T14:09:42Z",
+      "mergedAt": "2024-11-13T14:09:42Z",
+      "mergedBy": "arndt-s",
+      "mergeCommit": {
+        "oid": "9abc835ab1e88f3bfc18f626ce789e007a04f9db"
+      },
       "comments": [
         {
           "author": "hannestschofenig",
@@ -753,6 +779,88 @@
               "updatedAt": "2024-11-04T16:25:32Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL34A-M6RCZsn",
+          "commit": {
+            "abbreviatedOid": "498c609"
+          },
+          "author": "arndt-s",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-11-13T14:05:16Z",
+          "updatedAt": "2024-11-13T14:05:16Z",
+          "comments": [
+            {
+              "originalPosition": 2,
+              "body": "Let's discuss title in #6",
+              "createdAt": "2024-11-13T14:05:16Z",
+              "updatedAt": "2024-11-13T14:05:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL34A-M6RCczX",
+          "commit": {
+            "abbreviatedOid": "498c609"
+          },
+          "author": "arndt-s",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-11-13T14:08:24Z",
+          "updatedAt": "2024-11-13T14:08:24Z",
+          "comments": [
+            {
+              "originalPosition": 101,
+              "body": "Created #9",
+              "createdAt": "2024-11-13T14:08:24Z",
+              "updatedAt": "2024-11-13T14:08:25Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 10,
+      "id": "PR_kwDOL34A-M6ByzLa",
+      "title": "Add document history section",
+      "url": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp/pull/10",
+      "state": "MERGED",
+      "author": "arndt-s",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Adds a document history section for the past, present and future :)",
+      "createdAt": "2024-11-13T14:35:23Z",
+      "updatedAt": "2024-11-13T14:58:21Z",
+      "baseRepository": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
+      "baseRefName": "main",
+      "baseRefOid": "9abc835ab1e88f3bfc18f626ce789e007a04f9db",
+      "headRepository": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
+      "headRefName": "arndt/add_document_history",
+      "headRefOid": "2d610154e116e9d9aceb08319401bea3661740b7",
+      "closedAt": "2024-11-13T14:56:03Z",
+      "mergedAt": "2024-11-13T14:56:03Z",
+      "mergedBy": "arndt-s",
+      "mergeCommit": {
+        "oid": "3916596e1656d1d21108ca660bbf060a3b57b234"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL34A-M6RDETg",
+          "commit": {
+            "abbreviatedOid": "2d61015"
+          },
+          "author": "jricher",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-11-13T14:55:34Z",
+          "updatedAt": "2024-11-13T14:55:34Z",
+          "comments": []
         }
       ]
     }
