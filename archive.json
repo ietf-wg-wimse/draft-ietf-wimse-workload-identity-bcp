@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-11-17T00:59:33.826298+00:00",
+  "timestamp": "2024-11-19T00:56:25.021410+00:00",
   "repo": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
   "labels": [
     {
@@ -120,6 +120,22 @@
           "updatedAt": "2024-11-13T14:08:15Z"
         }
       ]
+    },
+    {
+      "number": 11,
+      "id": "I_kwDOL34A-M6e-zPp",
+      "title": "ID Token support clarification",
+      "url": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp/issues/11",
+      "state": "OPEN",
+      "author": "simon-canning-octopus",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Hi \ud83d\udc4b, first time contributing so please direct me elsewhere if appropriate.\r\n\r\nI believe GitHub Actions currently supports the model defined by this document and refers to it as '[Security hardening with OpenID Connect](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/about-security-hardening-with-openid-connect)'. The tokens GitHub Actions issues are referred to as '[OIDC tokens](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/about-security-hardening-with-openid-connect#understanding-the-oidc-token)' / '[ID Tokens](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/about-security-hardening-with-openid-connect#understanding-the-oidc-token)'.\r\n\r\nhttps://github.com/ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp/blob/3916596e1656d1d21108ca660bbf060a3b57b234/draft-ietf-wimse-workload-identity-bcp.md?plain=1#L204\r\n\r\nIs there a reason/explanation behind why ID tokens must not be accepted? Is it to ensure the token (i.e., the `sub`) represents the workload identity, and not a user identity?\r\n\r\nAside/context: Within my organization, and our customer base, people refer to the pattern described as 'OIDC support' or 'OIDC federated identity'. We build a product in the CI/CD tooling space.",
+      "createdAt": "2024-11-18T05:57:43Z",
+      "updatedAt": "2024-11-18T05:57:43Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
