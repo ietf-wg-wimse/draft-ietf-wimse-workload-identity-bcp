@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-11-26T00:57:02.660817+00:00",
+  "timestamp": "2024-11-28T00:57:37.955761+00:00",
   "repo": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
   "labels": [
     {
@@ -136,6 +136,37 @@
       "updatedAt": "2024-11-18T05:57:43Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 13,
+      "id": "I_kwDOL34A-M6guWSM",
+      "title": "intended audience",
+      "url": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp/issues/13",
+      "state": "OPEN",
+      "author": "adeinega",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The aud claim of a service account access token in K8s MUST include the URL of an OAuth server, and MUST NOT include the Kubernetes API server itself.\r\n\r\nThis ensures that these access tokens cannot be reused / misused. The same principle applies to all other JWTs mentioned in the document + provided examples.",
+      "createdAt": "2024-11-26T23:59:34Z",
+      "updatedAt": "2024-11-27T18:16:18Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "arndt-s",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@adeinega any particular reason why it must be a URL and not just an identifier?\r\nRFC 7523 uses the following definition:\r\n> The JWT MUST contain an \"aud\" (audience) claim containing a value that identifies the authorization server as an intended audience.  The token endpoint URL of the authorization server MAY be used as a value for an \"aud\" element to identify the authorization server as an intended audience of the JWT.\r\n\r\nRegarding the Kubernetes API server - while it surely shouldn't be there if not needed but MUST NOT seem to conflict with workloads that need to communicate with the API server. Do you have something else in mind apart from keeping the scope of the Kubernetes token as small as possible?",
+          "createdAt": "2024-11-27T14:26:13Z",
+          "updatedAt": "2024-11-27T14:27:42Z"
+        },
+        {
+          "author": "adeinega",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I think it could be the authorization server's issuer identifier per https://datatracker.ietf.org/doc/html/rfc8414#section-2, or just about the same but from https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata.\r\n\r\nSpecifying the token endpoint URL, as you mentioned, makes things even better, however it also needs to be said - there are a few other endpoints that require an OAuth client to be authenticated (I refer specifically to token revocation and introspect endpoints), and that makes it more challenging to use projected ATs.\r\n\r\nIf workloads need to communicate with the Kubernetes API server, the simplest solution is to use the service account token located at /var/run/secrets/kubernetes.io/serviceaccount.\r\n\r\nHaving seen so many cases of misuse, I believe any documents we produce should leave as little room as possible for that. \r\n\r\nIf workloads want to use service account (SA) access tokens as client credentials, they can obtain them through one of two methods:\r\n1. Token Request API which would also require the workload to know how to use this API and to have all permissions to request an access token with the intended audience and so forth, or\r\n2. a service account token projected into the file system, for instance, /var/run/secrets/client-abcde/assertion\r\n\r\nThis approach serves as a protective mechanism against token reuse, misuse, and malicious actions from workloads. By doing this, an AS never receives an assertion it could reply against the Kubernetes API. Additionally, workloads will find it significantly harder (whether intentionally or unintentionally) to share their access tokens with other workloads without detection.\r\n\r\nAs a random note on this, I'm also curious to see how K8s Token Request API would evolve over the time... In terms of providing a lightweight DPoP mechanism for its SA ATs.",
+          "createdAt": "2024-11-27T18:16:17Z",
+          "updatedAt": "2024-11-27T18:16:17Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -876,6 +907,48 @@
           "body": "",
           "createdAt": "2024-11-13T14:55:34Z",
           "updatedAt": "2024-11-13T14:55:34Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 12,
+      "id": "PR_kwDOL34A-M6DP0kK",
+      "title": "Mnr changes for abstract",
+      "url": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp/pull/12",
+      "state": "MERGED",
+      "author": "adeinega",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2024-11-26T21:51:18Z",
+      "updatedAt": "2024-11-27T18:18:43Z",
+      "baseRepository": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-bcp",
+      "baseRefName": "main",
+      "baseRefOid": "3916596e1656d1d21108ca660bbf060a3b57b234",
+      "headRepository": "adeinega/draft-ietf-wimse-workload-identity-bcp",
+      "headRefName": "patch-1",
+      "headRefOid": "117c7b07e5a5416bfd76f51920011bed97fd9644",
+      "closedAt": "2024-11-27T14:25:25Z",
+      "mergedAt": "2024-11-27T14:25:25Z",
+      "mergedBy": "arndt-s",
+      "mergeCommit": {
+        "oid": "96112470802e7c83bdf917ffa25227be799ae62c"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL34A-M6S5qvV",
+          "commit": {
+            "abbreviatedOid": "117c7b0"
+          },
+          "author": "arndt-s",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Thank you @adeinega !",
+          "createdAt": "2024-11-27T10:17:38Z",
+          "updatedAt": "2024-11-27T10:17:38Z",
           "comments": []
         }
       ]
