@@ -24,6 +24,13 @@ pi:
 
 author:
  -
+      ins: A. Schwenkschuster
+      name: Arndt Schwenkschuster
+      email: arndts.ietf@gmail.com
+      org: SPIRL
+      role: editor
+
+ -
       ins: B. Hofmann
       name: Benedikt Hofmann
       email: hofmann.benedikt@siemens.com
@@ -46,12 +53,6 @@ author:
       name: Yaroslav Rosomakho
       email: yrosomakho@zscaler.com
       org: Zscaler
-
- -
-      ins: A. Schwenkschuster
-      name: Arndt Schwenkschuster
-      email: arndts.ietf@gmail.com
-      org: SPIRL
 
 normative:
   RFC2119:
@@ -548,6 +549,14 @@ While {{RFC7521}} and {{RFC7523}} are the proposed standards for this pattern, s
 # Document History
 
    [[ To be removed from the final specification ]]
+
+
+   -00
+
+   * Rename draft with no content changes.
+   * Set Arndt to Editor role.
+
+__[as draft-wimse-workload-identity-bcp]__
 
    -02
 
