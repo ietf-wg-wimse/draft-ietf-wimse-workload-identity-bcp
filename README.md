@@ -1,6 +1,6 @@
-# Best Current Practice for Workload Identity
+# OAuth 2.0 Client Assertion in Workload Environments
 
-This is the working area for the IETF [WIMSE Working Group](https://datatracker.ietf.org/wg/wimse/documents/) Internet-Draft, "Best Current Practice for Workload Identity".
+This is the working area for the IETF [WIMSE Working Group](https://datatracker.ietf.org/wg/wimse/documents/) Internet-Draft, "OAuth 2.0 Client Assertion in Workload Environments".
 
 * [Editor's Copy](https://ietf-wg-wimse.github.io/draft-ietf-wimse-workload-identity-bcp/#go.draft-ietf-wimse-workload-identity-bcp.html)
 * [Datatracker Page](https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-identity-bcp)
@@ -27,4 +27,5 @@ $ make
 
 Command line usage requires that you have the necessary software installed.  See
 [the instructions](https://github.com/martinthomson/i-d-template/blob/main/doc/SETUP.md).
+
 
