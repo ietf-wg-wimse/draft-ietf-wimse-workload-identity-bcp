@@ -5,8 +5,8 @@ docname: draft-ietf-wimse-workload-identity-bcp-latest
 category: info
 
 ipr: trust200902
-area: Security
-workgroup: WIMSE
+area: "Applications and Real-Time"
+workgroup: "Workload Identity in Multi System Environments"
 keyword: Internet-Draft
 
 stand_alone: yes
