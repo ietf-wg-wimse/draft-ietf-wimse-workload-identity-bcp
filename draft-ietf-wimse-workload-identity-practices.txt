@@ -2,20 +2,20 @@
 
 
 
-WIMSE                                                         B. Hofmann
-Internet-Draft                                             H. Tschofenig
-Intended status: Informational                                   Siemens
-Expires: 31 May 2025                                         E. Giordano
+Workload Identity in Multi System Environments   A. Schwenkschuster, Ed.
+Internet-Draft                                                     SPIRL
+Intended status: Informational                                B. Hofmann
+Expires: 7 June 2025                                       H. Tschofenig
+                                                                 Siemens
+                                                             E. Giordano
                                                                    Nokia
                                                             Y. Rosomakho
                                                                  Zscaler
-                                                      A. Schwenkschuster
-                                                                   SPIRL
-                                                        27 November 2024
+                                                         4 December 2024
 
 
-          OAuth 2.0 Client Assertion in Workload Environments
-             draft-ietf-wimse-workload-identity-bcp-latest
+                      Workload Identity Practices
+          draft-ietf-wimse-workload-identity-practices-latest
 
 Abstract
 
@@ -47,7 +47,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 31 May 2025.
+   This Internet-Draft will expire on 7 June 2025.
 
 Copyright Notice
 
@@ -797,6 +797,14 @@ Appendix C.  Document History
 
    [[ To be removed from the final specification ]]
 
+   -00
+
+   *  Rename draft with no content changes.
+
+   *  Set Arndt to Editor role.
+
+   *[as draft-wimse-workload-identity-bcp]*
+
    -02
 
    *  Move scope from Kubernetes to generic workload identity platform
@@ -825,6 +833,11 @@ Appendix C.  Document History
 
 Authors' Addresses
 
+   Arndt Schwenkschuster (editor)
+   SPIRL
+   Email: arndts.ietf@gmail.com
+
+
    Benedikt Hofmann
    Siemens
    Email: hofmann.benedikt@siemens.com
@@ -843,8 +856,3 @@ Authors' Addresses
    Yaroslav Rosomakho
    Zscaler
    Email: yrosomakho@zscaler.com
-
-
-   Arndt Schwenkschuster
-   SPIRL
-   Email: arndts.ietf@gmail.com
