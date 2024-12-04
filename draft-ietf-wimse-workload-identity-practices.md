@@ -1,7 +1,7 @@
 ---
-title: OAuth 2.0 Client Assertion in Workload Environments
+title: Workload Identity Practices
 abbrev: Workload Identity
-docname: draft-ietf-wimse-workload-identity-bcp-latest
+docname: draft-ietf-wimse-workload-identity-practices-latest
 category: info
 
 ipr: trust200902
