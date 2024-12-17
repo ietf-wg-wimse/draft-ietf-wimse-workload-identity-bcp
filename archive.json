@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-12-15T01:03:16.812906+00:00",
+  "timestamp": "2024-12-17T00:58:52.518597+00:00",
   "repo": "ietf-wg-wimse/draft-ietf-wimse-workload-identity-practices",
   "labels": [
     {
@@ -109,7 +109,7 @@
       "labels": [],
       "body": "Following the discussion on the mailing list, I wanted to give my take on the different options to provision the workload with the token.  Maybe we can use it to start the discussion before starting the PR. \r\n\r\nIdentity provision mechanisms:\r\nCurrent workload systems mainly rely on three solution to provide the Identity to a running workload:\r\n1. Environmental variables: they provide the easiest solution to inject the container with information, but presents some drawbacks:\r\n* Static nature: the information are injected when the container is started and cannot be modified at runtime\r\n * Access control: restricting access to environmental variable is more challenging and are usually exposed inside logs and to debugging tools\r\nENV variables should be used with short-live credentials, when simplicity is a requirement.\r\n2. Volumes, i.e., Projected volumes as named in Kubernetes, offer the possibility to pass information through the file-system. This allows to inject dynamical credentials, rotate them and perform a better access control. The main drawbacks of this solution is the additional complexity. Indeed, the solution requires multiple configurations:\r\n* The files need to have a proper access control definition, to prevent the unauthorized access of a different process\r\n* The mounted volume needs to be correctly isolated to prevent a compromised container to be able to gain more control over the host machine\r\n* The additional burden of monitoring the different workload to maintain valid credentials in each container (this last element can be handled by the orchestrator). \r\nThe main advantages of this approach, with respect to the previous one, is in a better access control of the resource and the possibility to rotate the credentials without the need to restart the container. This solution fits well when multiple different process in the container need to access the credential's file.\r\n3. Loopback interface relies on a local endpoint, usually exposing an HTTP or a gRPC interface, to provide the identity information to the workload. This solution, present additional advantages to the cost of complexity:\r\n* Limiting the exposure of the credential thanks to the properties of network isolation in the loopback interface. \r\n* It also allows an on-demand fetching and rotation of the credentials. \r\nNevertheless, there are also some drawback in using this solution:\r\n* The dependency on the network stack, which may differ based on the host machine, and creating a one-for-all solution might require additional code.\r\n* The additional latency due to the request and the increase of the operational overhead.\r\nThis approach should be preferred in conjunction with side-cars/agents and centrally managed identities solutions for application that requires dynamic credentials. \r\n",
       "createdAt": "2024-08-12T08:11:15Z",
-      "updatedAt": "2024-12-02T16:26:15Z",
+      "updatedAt": "2024-12-16T08:02:43Z",
       "closedAt": null,
       "comments": [
         {
@@ -118,6 +118,13 @@
           "body": "> 1. Environmental:\r\n\r\nI mostly agree with this. Although ``are usually exposed inside logs`` can you provide an example of this statement.\r\n\r\nIn theory it is also possible to rotate Environment Variables.\r\n\r\n> 2. Volumes:\r\n\r\n- ``and perform a better access control.`` based on DAC (uid and gid) or protect with additional MAC methods such as SELinux\r\n- ``The files need to have a proper access control definition, to prevent the unauthorized access of a different process`` **or** using **different mount namespaces** to prevend **unauthorizted processes** from accessing the file.\r\n\r\n> 3. UNIX Domain Socket/Loopback interface/Magic (Link-Local) Address (e.g., AWS Metadata Service 169.254.169.254) \r\n\r\n- ``UNIX Domain Socket``: I think we should mention this as well as \r\n  ![Spire Docs](https://github.com/user-attachments/assets/1ea00ad1-be63-4cf9-99a9-4012852fc703)\r\n  - [spiffe.io/docs](https://spiffe.io/docs/latest/deploying/install-agents/#step-3-create-agent-daemonset)\r\n\r\n- ``lo and Link-Local`` addresses\r\n\r\n@edoardogiordano wdyt?",
           "createdAt": "2024-12-02T16:26:12Z",
           "updatedAt": "2024-12-02T16:26:12Z"
+        },
+        {
+          "author": "edoardogiordano",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Hi @b3n3d17, sorry for the late response.\r\n\r\nRegarding the environmental variables, my point is that it can often happen that people print the env at the start of the program to show how the program was launched, or if a problem happens to help with the debugging. If you don't think this is anymore the case we can just remove it. \r\nRegarding the possibility to rotate env Variable, do you have any reference? I was not aware of this possibility without restarting the application.\r\n\r\nFor the last two point thanks for the references. I'll include them while preparing the pr.\r\n\r\nThanks.",
+          "createdAt": "2024-12-16T08:02:41Z",
+          "updatedAt": "2024-12-16T08:02:41Z"
         }
       ]
     },
